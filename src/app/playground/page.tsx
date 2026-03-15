@@ -11,9 +11,22 @@ interface PlaygroundPageProps {
 
 export async function generateMetadata({ searchParams }: PlaygroundPageProps) {
   const { url } = await searchParams;
+  if (!url) {
+    return {
+      title: "Playground",
+      description: "Interactively test MCP server tools with live execution.",
+    };
+  }
+  // Use hostname as a friendly server name
+  let serverName = url;
+  try {
+    serverName = new URL(url).hostname;
+  } catch {
+    // fall through
+  }
   return {
-    title: url ? `Playground — ${url}` : "Playground — MCP Playground",
-    description: "Interactively test MCP server tools with live execution.",
+    title: `Testing ${serverName}`,
+    description: `Interactive tool playground for ${url}. Run tools, inspect responses, and share sessions.`,
   };
 }
 

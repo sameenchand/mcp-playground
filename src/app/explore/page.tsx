@@ -3,10 +3,22 @@ import { ArrowRight, Package } from "lucide-react";
 import { fetchServers } from "@/lib/registry-api";
 import { ServerGrid } from "@/components/registry/server-grid";
 
-export const metadata = {
-  title: "Explore MCP Servers — MCP Playground",
-  description: "Browse and search all MCP servers from the official registry.",
-};
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  let count = 0;
+  try {
+    const { fetchServers } = await import("@/lib/registry-api");
+    const servers = await fetchServers();
+    count = servers.length;
+  } catch {
+    // fall through with count = 0
+  }
+  return {
+    title: count > 0 ? `Browse ${count} MCP Servers` : "Browse MCP Servers",
+    description: `Explore ${count > 0 ? count + " " : ""}MCP servers from the official registry. Search, filter, and inspect available tools and resources.`,
+  };
+}
 
 export default async function ExplorePage() {
   const servers = await fetchServers();

@@ -24,6 +24,7 @@ interface PlaygroundClientProps {
   serverUrl: string;
   initialTool?: string;
   initialArgs?: Record<string, unknown>;
+  embedded?: boolean;
 }
 
 const MAX_HISTORY = 50;
@@ -73,7 +74,7 @@ function MobileToolSelect({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function PlaygroundClient({ serverUrl, initialTool, initialArgs }: PlaygroundClientProps) {
+export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded = false }: PlaygroundClientProps) {
   const router = useRouter();
   const submitFnRef = useRef<(() => void) | null>(null);
 
@@ -309,7 +310,7 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs }: Playgr
   if (tools.length === 0) {
     return (
       <>
-        {inspectResult && (
+        {inspectResult && !embedded && (
           <ConnectionHeader serverUrl={serverUrl} inspectResult={inspectResult} />
         )}
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
@@ -332,8 +333,10 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs }: Playgr
   // ── Main 3-panel layout ────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full">
-      {/* Connection header */}
-      <ConnectionHeader serverUrl={serverUrl} inspectResult={inspectResult} />
+      {/* Connection header — hidden in embedded mode */}
+      {!embedded && (
+        <ConnectionHeader serverUrl={serverUrl} inspectResult={inspectResult} />
+      )}
 
       {/* Toolbar: share button */}
       <div className="flex items-center justify-end px-4 py-2 border-b border-border/30 bg-background">

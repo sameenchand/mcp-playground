@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { Sun, Moon, Github } from "lucide-react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -9,12 +12,32 @@ const navLinks = [
   { href: "/connect", label: "Connect" },
   { href: "/playground", label: "Playground" },
   { href: "/about", label: "About" },
-  {
-    href: "https://github.com",
-    label: "GitHub",
-    external: true,
-  },
 ];
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return <div className="h-8 w-8" />;
+  }
+
+  return (
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+      aria-label="Toggle theme"
+    >
+      {theme === "dark" ? (
+        <Sun className="h-4 w-4" />
+      ) : (
+        <Moon className="h-4 w-4" />
+      )}
+    </button>
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -37,10 +60,8 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              target={link.external ? "_blank" : undefined}
-              rel={link.external ? "noopener noreferrer" : undefined}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors hidden sm:block",
                 pathname === link.href
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -49,6 +70,18 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          <div className="flex items-center gap-1 ml-1 pl-2 border-l border-border/50">
+            <Link
+              href="https://github.com/sameenchand/mcp-playground"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+              aria-label="GitHub"
+            >
+              <Github className="h-4 w-4" />
+            </Link>
+            <ThemeToggle />
+          </div>
         </nav>
       </div>
     </header>

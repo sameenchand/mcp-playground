@@ -1,9 +1,9 @@
 import { ConnectClient } from "@/components/inspector/connect-client";
 
 export const metadata = {
-  title: "Connect a Server — MCP Playground",
+  title: "Connect to an MCP Server",
   description:
-    "Connect to any remote MCP server and inspect its tools, resources, and prompts live in your browser.",
+    "Connect to any remote MCP server and inspect its tools, resources, and prompts live in your browser. Supports Streamable HTTP and SSE.",
 };
 
 export default function ConnectPage() {
