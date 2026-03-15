@@ -1,0 +1,23 @@
+import { ConnectClient } from "@/components/inspector/connect-client";
+
+export const metadata = {
+  title: "Connect a Server — MCP Playground",
+  description:
+    "Connect to any remote MCP server and inspect its tools, resources, and prompts live in your browser.",
+};
+
+export default function ConnectPage() {
+  return (
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-foreground">Connect a Server</h1>
+        <p className="text-muted-foreground mt-1 max-w-2xl">
+          Paste any remote MCP server URL to inspect its tools, resources, and prompts live — no
+          installation needed. Supports Streamable HTTP and SSE transports.
+        </p>
+      </div>
+
+      <ConnectClient />
+    </div>
+  );
+}
