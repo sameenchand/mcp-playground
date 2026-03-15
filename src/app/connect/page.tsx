@@ -7,11 +7,11 @@ export const metadata = {
 };
 
 interface ConnectPageProps {
-  searchParams: Promise<{ url?: string }>;
+  searchParams: Promise<{ url?: string; headerNames?: string }>;
 }
 
 export default async function ConnectPage({ searchParams }: ConnectPageProps) {
-  const { url } = await searchParams;
+  const { url, headerNames } = await searchParams;
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
@@ -23,7 +23,7 @@ export default async function ConnectPage({ searchParams }: ConnectPageProps) {
         </p>
       </div>
 
-      <ConnectClient initialUrl={url} />
+      <ConnectClient initialUrl={url} initialHeaderNames={headerNames} />
     </div>
   );
 }

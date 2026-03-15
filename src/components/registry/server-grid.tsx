@@ -42,13 +42,13 @@ export function ServerGrid({ servers }: ServerGridProps) {
     { id: "all", label: "All", count: servers.length, icon: null },
     {
       id: "live",
-      label: "Has endpoint",
+      label: "Testable now",
       count: liveCount,
       icon: <Wifi className="h-3 w-3" />,
     },
     {
       id: "no-auth",
-      label: "No auth listed",
+      label: "No auth needed",
       count: noAuthCount,
       icon: <Package className="h-3 w-3" />,
     },
@@ -90,10 +90,16 @@ export function ServerGrid({ servers }: ServerGridProps) {
       </div>
 
       {/* Filter description */}
+      {filter === "live" && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Wifi className="h-3.5 w-3.5 text-green-500" />
+          Servers with remote HTTP endpoints you can connect to and test right now.
+        </div>
+      )}
       {filter === "no-auth" && (
         <div className="flex items-center gap-2 text-xs text-amber-500/80">
           <Lock className="h-3.5 w-3.5" />
-          These servers have live endpoints with no auth headers declared in the registry. Most work without a key, but some may still require one at runtime.
+          Servers with live endpoints and no auth headers listed in the registry. Most work without a key, but some may still require one.
         </div>
       )}
 

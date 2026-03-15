@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { fetchServers } from "@/lib/registry-api";
 import { ServerGrid } from "@/components/registry/server-grid";
 import type { Metadata } from "next";
@@ -25,7 +26,10 @@ export default async function ExplorePage() {
             <>
               Showing {servers.length.toLocaleString()} of 10,000+ servers in the official registry —{" "}
               <span className="text-green-500 font-medium">{liveCount} with live remote endpoints</span>
-              {" "}you can inspect and test right now
+              {" "}you can test right now.{" "}
+              <Link href="/docs/local-servers" className="text-primary hover:underline underline-offset-4">
+                Want to test a local server?
+              </Link>
             </>
           ) : (
             "Browse servers from the official MCP registry"

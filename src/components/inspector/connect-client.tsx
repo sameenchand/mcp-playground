@@ -219,31 +219,61 @@ function StatusIndicator({ status, step }: { status: Status; step?: string }) {
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-export function ConnectClient({ initialUrl }: { initialUrl?: string }) {
+export function ConnectClient({
+  initialUrl,
+  initialHeaderNames,
+}: {
+  initialUrl?: string;
+  /** JSON-encoded array of { name, description } for pre-populating auth header fields */
+  initialHeaderNames?: string;
+}) {
   const [url, setUrl] = useState(initialUrl ?? "");
   const [state, setState] = useState<ConnectionState>({ status: "idle" });
   const [headerEntries, setHeaderEntries] = useState<HeaderEntry[]>([]);
   const [showHeaders, setShowHeaders] = useState(false);
 
-  // Auto-open headers panel if URL already has saved headers
+  // Pre-populate header names from URL params (e.g. linked from server detail page)
+  // or restore saved headers from sessionStorage
   useEffect(() => {
-    if (!initialUrl || typeof window === "undefined") return;
-    try {
-      const stored = sessionStorage.getItem(`mcp_headers_${btoa(initialUrl)}`);
-      if (stored) {
-        const parsed = JSON.parse(stored) as Record<string, string>;
-        const entries = Object.entries(parsed).map(([name, value]) => ({
-          id: crypto.randomUUID(),
-          name,
-          value,
-        }));
-        if (entries.length > 0) {
-          setHeaderEntries(entries);
+    if (typeof window === "undefined") return;
+
+    // First try: pre-fill from headerNames param (from server detail link)
+    if (initialHeaderNames) {
+      try {
+        const parsed = JSON.parse(initialHeaderNames) as Array<{ name: string; description?: string }>;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setHeaderEntries(
+            parsed.map((h) => ({
+              id: crypto.randomUUID(),
+              name: h.name,
+              value: "",
+            })),
+          );
           setShowHeaders(true);
+          return; // Don't override with sessionStorage
         }
-      }
-    } catch {}
-  }, [initialUrl]);
+      } catch {}
+    }
+
+    // Second try: restore from sessionStorage
+    if (initialUrl) {
+      try {
+        const stored = sessionStorage.getItem(`mcp_headers_${btoa(initialUrl)}`);
+        if (stored) {
+          const parsed = JSON.parse(stored) as Record<string, string>;
+          const entries = Object.entries(parsed).map(([name, value]) => ({
+            id: crypto.randomUUID(),
+            name,
+            value,
+          }));
+          if (entries.length > 0) {
+            setHeaderEntries(entries);
+            setShowHeaders(true);
+          }
+        }
+      } catch {}
+    }
+  }, [initialUrl, initialHeaderNames]);
 
   const headersAsRecord = (): Record<string, string> => {
     const result: Record<string, string> = {};

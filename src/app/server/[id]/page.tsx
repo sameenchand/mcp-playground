@@ -199,11 +199,14 @@ export default async function ServerPage({ params }: ServerPageProps) {
               <AlertCircle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm text-muted-foreground">
-                  Get your API key, then paste this URL into{" "}
-                  <Link href="/connect" className="text-primary hover:underline underline-offset-4">
-                    Connect a Server
+                  Get your API key, then{" "}
+                  <Link
+                    href={`/connect?url=${encodeURIComponent(server.remoteUrl!)}&headerNames=${encodeURIComponent(JSON.stringify(requiredHeaders.map((h) => ({ name: h.name, description: h.description }))))}`}
+                    className="text-primary hover:underline underline-offset-4"
+                  >
+                    connect with pre-filled headers
                   </Link>{" "}
-                  — the playground will prompt you for auth headers once connected.
+                  — just paste your key values and hit Inspect.
                 </p>
               </div>
             </div>

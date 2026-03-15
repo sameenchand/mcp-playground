@@ -198,28 +198,35 @@ export default async function HomePage() {
             Built on the official MCP SDK · Open Source
           </div>
           <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground mb-5">
-            Test any MCP server.{" "}
+            Test any remote MCP server.{" "}
             <span className="text-primary">Right in your browser.</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            The interactive playground for Model Context Protocol. Browse
-            servers, inspect tools, and run them live — no installation needed.
+            The interactive playground for Model Context Protocol. Paste a server URL,
+            inspect tools, and run them live — no installation needed. Bring your own API key for authenticated servers.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
             <Link
-              href="/connect"
+              href="/playground?url=https%3A%2F%2Fmcp.deepwiki.com%2Fmcp&tool=ask_question"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
             >
-              Connect a Server
-              <ArrowRight className="h-4 w-4" />
+              <Zap className="h-4 w-4" />
+              Try it now — no setup
             </Link>
             <Link
-              href="/explore"
+              href="/connect"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-card text-foreground font-semibold text-sm hover:bg-accent transition-colors"
             >
-              Browse Registry
+              Connect your own server
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+          <p className="mt-4 text-xs text-muted-foreground/60">
+            Works with any Streamable HTTP or SSE endpoint.{" "}
+            <Link href="/explore" className="underline underline-offset-4 hover:text-muted-foreground transition-colors">
+              Browse {serverCount}+ servers in the registry →
+            </Link>
+          </p>
         </div>
 
         <PlaygroundMockup />
