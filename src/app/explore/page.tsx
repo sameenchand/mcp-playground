@@ -2,18 +2,13 @@ import { fetchServers } from "@/lib/registry-api";
 import { ServerGrid } from "@/components/registry/server-grid";
 import type { Metadata } from "next";
 
+export const revalidate = 3600;
+
 export async function generateMetadata(): Promise<Metadata> {
-  let count = 0;
-  try {
-    const { fetchServers: fs } = await import("@/lib/registry-api");
-    const servers = await fs();
-    count = servers.length;
-  } catch {
-    // fall through
-  }
   return {
-    title: count > 0 ? `Browse ${count} MCP Servers` : "Browse MCP Servers",
-    description: `Explore ${count > 0 ? count + " " : ""}MCP servers from the official registry. Click any server to inspect it live — no installation needed.`,
+    title: "Browse 10,000+ MCP Servers",
+    description:
+      "Explore servers from the official MCP registry. Filter by live remote endpoints, inspect tools and resources, and test them — no installation needed.",
   };
 }
 
@@ -28,7 +23,7 @@ export default async function ExplorePage() {
         <p className="text-muted-foreground mt-1">
           {servers.length > 0 ? (
             <>
-              {servers.length} servers in the official registry —{" "}
+              Showing {servers.length.toLocaleString()} of 10,000+ servers in the official registry —{" "}
               <span className="text-green-500 font-medium">{liveCount} with live remote endpoints</span>
               {" "}you can inspect and test right now
             </>

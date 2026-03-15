@@ -88,25 +88,41 @@ function mapServer(raw: RawServerData): MCPServer {
 
 // --- Public API ---
 
+const MAX_PAGES = 5; // 500 servers max per cold load; cached for 1 hour via ISR
+
 export async function fetchServers(): Promise<MCPServer[]> {
-  try {
-    const res = await fetch(`${REGISTRY_BASE}/v0.1/servers?limit=100`, {
-      next: { revalidate: 300 },
-    });
-    if (!res.ok) throw new Error(`Registry API error: ${res.status}`);
-    const data: V01ListResponse = await res.json();
-    const seen = new Set<string>();
-    return (data.servers ?? [])
-      .map((entry) => mapServer(entry.server))
-      .filter((s) => {
-        if (seen.has(s.id)) return false;
-        seen.add(s.id);
-        return true;
-      });
-  } catch (error) {
-    console.error("Failed to fetch servers from registry:", error);
-    return [];
+  const allServers: MCPServer[] = [];
+  const seen = new Set<string>();
+  let cursor: string | undefined;
+
+  for (let page = 0; page < MAX_PAGES; page++) {
+    try {
+      const url = cursor
+        ? `${REGISTRY_BASE}/v0.1/servers?limit=100&cursor=${encodeURIComponent(cursor)}`
+        : `${REGISTRY_BASE}/v0.1/servers?limit=100`;
+
+      const res = await fetch(url, { next: { revalidate: 3600 } });
+      if (!res.ok) throw new Error(`Registry API error: ${res.status}`);
+
+      const data: V01ListResponse = await res.json();
+
+      for (const entry of data.servers ?? []) {
+        const server = mapServer(entry.server);
+        if (!seen.has(server.id)) {
+          seen.add(server.id);
+          allServers.push(server);
+        }
+      }
+
+      cursor = data.metadata?.nextCursor;
+      if (!cursor) break;
+    } catch (error) {
+      console.error(`Failed to fetch servers page ${page + 1}:`, error);
+      break;
+    }
   }
+
+  return allServers;
 }
 
 export async function fetchServerById(id: string): Promise<MCPServer | null> {

@@ -48,7 +48,7 @@ export function ServerGrid({ servers }: ServerGridProps) {
     },
     {
       id: "no-auth",
-      label: "No auth needed",
+      label: "No auth listed",
       count: noAuthCount,
       icon: <Package className="h-3 w-3" />,
     },
@@ -91,9 +91,9 @@ export function ServerGrid({ servers }: ServerGridProps) {
 
       {/* Filter description */}
       {filter === "no-auth" && (
-        <div className="flex items-center gap-2 text-xs text-green-500">
+        <div className="flex items-center gap-2 text-xs text-amber-500/80">
           <Lock className="h-3.5 w-3.5" />
-          These servers have public HTTP endpoints with no API key required — click any to inspect immediately.
+          These servers have live endpoints with no auth headers declared in the registry. Most work without a key, but some may still require one at runtime.
         </div>
       )}
 
