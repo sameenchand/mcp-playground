@@ -6,7 +6,13 @@ export const metadata = {
     "Connect to any remote MCP server and inspect its tools, resources, and prompts live in your browser. Supports Streamable HTTP and SSE.",
 };
 
-export default function ConnectPage() {
+interface ConnectPageProps {
+  searchParams: Promise<{ url?: string }>;
+}
+
+export default async function ConnectPage({ searchParams }: ConnectPageProps) {
+  const { url } = await searchParams;
+
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
       <div className="mb-8">
@@ -17,7 +23,7 @@ export default function ConnectPage() {
         </p>
       </div>
 
-      <ConnectClient />
+      <ConnectClient initialUrl={url} />
     </div>
   );
 }

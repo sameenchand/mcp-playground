@@ -1,16 +1,23 @@
 const REGISTRY_BASE = "https://registry.modelcontextprotocol.io";
 
+export interface RemoteHeader {
+  name: string;
+  description?: string;
+  isRequired?: boolean;
+  isSecret?: boolean;
+}
+
 export interface MCPServer {
-  id: string;        // = server.name, the stable unique identifier (e.g. "io.github.user/repo")
-  name: string;      // display name: server.title ?? server.name
+  id: string;          // server.name — stable unique identifier e.g. "io.github.user/repo"
+  name: string;        // display name: server.title ?? server.name
   description: string;
   version?: string;
-  repository?: {
-    url?: string;
-  };
-  remoteUrl?: string; // first entry in server.remotes[], if any
+  websiteUrl?: string;
+  repository?: { url?: string };
+  remoteUrl?: string;        // first entry in server.remotes[], if any
+  remoteHeaders?: RemoteHeader[]; // auth headers required for the remote endpoint
   packages?: Array<{
-    registry_name?: string;
+    registry_name?: string;  // "npm" | "pypi" etc.
     name?: string;
     version?: string;
   }>;
@@ -22,13 +29,20 @@ export interface MCPServer {
 
 // --- Raw API types ---
 
+interface RawRemote {
+  type: string;
+  url: string;
+  headers?: RemoteHeader[];
+}
+
 interface RawServerData {
   name: string;
   title?: string;
   description?: string;
   version?: string;
+  websiteUrl?: string;
   repository?: { url?: string; source?: string; id?: string; subfolder?: string };
-  remotes?: Array<{ type: string; url: string }>;
+  remotes?: RawRemote[];
   packages?: Array<{ registry_name?: string; name?: string; version?: string }>;
   categories?: string[];
   tags?: string[];
@@ -43,10 +57,7 @@ interface RawServerEntry {
 
 interface V01ListResponse {
   servers: RawServerEntry[];
-  metadata?: {
-    nextCursor?: string;
-    count?: number;
-  };
+  metadata?: { nextCursor?: string; count?: number };
 }
 
 interface V01DetailResponse {
@@ -57,13 +68,16 @@ interface V01DetailResponse {
 // --- Mapper ---
 
 function mapServer(raw: RawServerData): MCPServer {
+  const firstRemote = raw.remotes?.[0];
   return {
     id: raw.name,
     name: raw.title ?? raw.name,
     description: raw.description ?? "",
     version: raw.version,
+    websiteUrl: raw.websiteUrl,
     repository: raw.repository ? { url: raw.repository.url } : undefined,
-    remoteUrl: raw.remotes?.[0]?.url,
+    remoteUrl: firstRemote?.url,
+    remoteHeaders: firstRemote?.headers,
     packages: raw.packages,
     categories: raw.categories,
     tags: raw.tags,
@@ -79,9 +93,7 @@ export async function fetchServers(): Promise<MCPServer[]> {
     const res = await fetch(`${REGISTRY_BASE}/v0.1/servers?limit=100`, {
       next: { revalidate: 300 },
     });
-    if (!res.ok) {
-      throw new Error(`Registry API error: ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`Registry API error: ${res.status}`);
     const data: V01ListResponse = await res.json();
     const seen = new Set<string>();
     return (data.servers ?? [])
@@ -99,7 +111,6 @@ export async function fetchServers(): Promise<MCPServer[]> {
 
 export async function fetchServerById(id: string): Promise<MCPServer | null> {
   try {
-    // id is the server name — must be URL-encoded
     const encoded = encodeURIComponent(id);
     const res = await fetch(
       `${REGISTRY_BASE}/v0.1/servers/${encoded}/versions/latest`,

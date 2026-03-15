@@ -117,8 +117,8 @@ function StatusIndicator({ status, step }: { status: Status; step?: string }) {
   );
 }
 
-export function ConnectClient() {
-  const [url, setUrl] = useState("");
+export function ConnectClient({ initialUrl }: { initialUrl?: string }) {
+  const [url, setUrl] = useState(initialUrl ?? "");
   const [state, setState] = useState<ConnectionState>({ status: "idle" });
 
   const inspect = async (targetUrl: string) => {
