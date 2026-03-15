@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { PlaygroundClient } from "@/components/playground/playground-client";
+import { PlaygroundLanding } from "@/components/playground/playground-landing";
 
 interface PlaygroundPageProps {
   searchParams: Promise<{
@@ -34,7 +34,7 @@ export default async function PlaygroundPage({ searchParams }: PlaygroundPagePro
   const { url, tool, args: argsParam } = await searchParams;
 
   if (!url) {
-    redirect("/connect");
+    return <PlaygroundLanding />;
   }
 
   // Decode initial args from base64 JSON if present

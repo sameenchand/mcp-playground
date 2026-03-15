@@ -88,7 +88,7 @@ function mapServer(raw: RawServerData): MCPServer {
 
 // --- Public API ---
 
-const MAX_PAGES = 5; // 500 servers max per cold load; cached for 1 hour via ISR
+const MAX_PAGES = 20; // 2000 servers max per cold load; cached for 1 hour via ISR
 
 export async function fetchServers(): Promise<MCPServer[]> {
   const allServers: MCPServer[] = [];

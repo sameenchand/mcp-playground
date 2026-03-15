@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Play, AlertCircle, ChevronDown, Share2, Check } from "lucide-react";
+import { Loader2, Play, AlertCircle, ChevronDown, Share2, Check, RotateCcw } from "lucide-react";
 import { SchemaForm } from "@/components/playground/schema-form";
 import { ResponseViewer, type ToolResult } from "@/components/playground/response-viewer";
 import { HistoryPanel, type HistoryEntry } from "@/components/playground/history-panel";
 import { ToolSidebar } from "@/components/playground/tool-sidebar";
 import { ConnectionHeader } from "@/components/playground/connection-header";
+import { saveRecentServer } from "@/components/playground/playground-landing";
 import type { InspectResult, ToolSchema } from "@/lib/mcp-client";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -108,38 +109,48 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
     } catch {}
   }, [serverUrl]);
 
-  // ── Auto-inspect on mount ──────────────────────────────────────────────────
-  useEffect(() => {
-    async function doInspect() {
-      setInspectStatus("loading");
-      try {
-        const res = await fetch("/api/mcp/inspect", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: serverUrl, headers: authHeaders }),
-        });
-        const data = await res.json() as unknown;
-        if (!res.ok) {
-          const err = data as { error?: string };
-          setInspectError(err.error ?? "Failed to connect to server.");
-          setInspectStatus("error");
-          return;
-        }
-        const result = data as InspectResult;
-        setInspectResult(result);
-        setInspectStatus("ready");
-
-        // Pre-select tool from URL param or first tool
-        const toolToSelect = initialTool ?? result.tools[0]?.name ?? null;
-        if (toolToSelect) setSelectedToolName(toolToSelect);
-      } catch {
-        setInspectError("Network error — check your connection.");
+  // ── Inspect logic (reusable for retry) ────────────────────────────────────
+  const doInspect = useCallback(async () => {
+    setInspectStatus("loading");
+    setInspectError(null);
+    try {
+      const res = await fetch("/api/mcp/inspect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: serverUrl, headers: authHeaders }),
+      });
+      const data = await res.json() as unknown;
+      if (!res.ok) {
+        const err = data as { error?: string };
+        setInspectError(err.error ?? "Failed to connect to server.");
         setInspectStatus("error");
+        return;
       }
+      const result = data as InspectResult;
+      setInspectResult(result);
+      setInspectStatus("ready");
+
+      // Save to recent servers
+      saveRecentServer(
+        serverUrl,
+        result.serverInfo?.name ?? new URL(serverUrl).hostname,
+        result.tools.length,
+      );
+
+      // Pre-select tool from URL param or first tool
+      const toolToSelect = initialTool ?? result.tools[0]?.name ?? null;
+      if (toolToSelect) setSelectedToolName(toolToSelect);
+    } catch {
+      setInspectError("Network error — check your connection.");
+      setInspectStatus("error");
     }
-    void doInspect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverUrl, authHeaders]);
+
+  // Auto-inspect on mount
+  useEffect(() => {
+    void doInspect();
+  }, [doInspect]);
 
   // ── Derived ────────────────────────────────────────────────────────────────
   const selectedTool: ToolSchema | null =
@@ -293,11 +304,7 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
         </div>
         <div className="flex gap-3">
           <button
-            onClick={() => {
-              setInspectStatus("loading");
-              setInspectError(null);
-              window.location.reload();
-            }}
+            onClick={() => void doInspect()}
             className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Retry
@@ -457,9 +464,18 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
           </h3>
 
           {executeError && !isRunning && (
-            <div className="flex items-start gap-2 p-3 rounded-md bg-red-500/5 border border-red-500/20 mb-4">
-              <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-400">{executeError}</p>
+            <div className="p-3 rounded-md bg-red-500/5 border border-red-500/20 mb-4 space-y-2">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                <p className="text-sm text-red-400">{executeError}</p>
+              </div>
+              <button
+                onClick={() => submitFnRef.current?.()}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted/50"
+              >
+                <RotateCcw className="h-3 w-3" />
+                Retry
+              </button>
             </div>
           )}
 

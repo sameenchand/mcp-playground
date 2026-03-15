@@ -7,7 +7,7 @@ export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Browse 10,000+ MCP Servers",
+    title: "Browse MCP Servers",
     description:
       "Explore servers from the official MCP registry. Filter by live remote endpoints, inspect tools and resources, and test them — no installation needed.",
   };
@@ -24,7 +24,7 @@ export default async function ExplorePage() {
         <p className="text-muted-foreground mt-1">
           {servers.length > 0 ? (
             <>
-              Showing {servers.length.toLocaleString()} of 10,000+ servers in the official registry —{" "}
+              {servers.length.toLocaleString()} servers loaded from the official MCP registry —{" "}
               <span className="text-green-500 font-medium">{liveCount} with live remote endpoints</span>
               {" "}you can test right now.{" "}
               <Link href="/docs/local-servers" className="text-primary hover:underline underline-offset-4">

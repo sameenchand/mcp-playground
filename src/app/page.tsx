@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Link2, Layers, Zap, Github, Star, Badge, ExternalLink } from "lucide-react";
 import { fetchServers } from "@/lib/registry-api";
 import { curatedServers } from "@/lib/featured-servers";
+import { checkFeaturedHealth } from "@/lib/featured-health";
 
 async function getRegistryCount(): Promise<number> {
   try {
@@ -181,7 +182,17 @@ function PlaygroundMockup() {
 }
 
 export default async function HomePage() {
-  const serverCount = await getRegistryCount();
+  const [serverCount, healthResults] = await Promise.all([
+    getRegistryCount(),
+    checkFeaturedHealth(),
+  ]);
+
+  const healthMap = new Map(healthResults.map((h) => [h.id, h]));
+  // Only show servers that are confirmed up (or unknown — give benefit of the doubt)
+  const liveCuratedServers = curatedServers.filter((s) => {
+    const h = healthMap.get(s.id);
+    return !h || h.status !== "down";
+  });
 
   return (
     <div className="flex flex-col">
@@ -313,36 +324,47 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {curatedServers.map((server) => (
-              <Link
-                key={server.id}
-                href={`/playground?url=${encodeURIComponent(server.url)}${server.highlightTool ? `&tool=${encodeURIComponent(server.highlightTool)}` : ""}`}
-                className="group rounded-xl border border-border/50 bg-card p-5 hover:border-primary/40 hover:bg-muted/20 transition-all"
-              >
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {server.name}
+            {liveCuratedServers.map((server) => {
+              const health = healthMap.get(server.id);
+              return (
+                <Link
+                  key={server.id}
+                  href={`/playground?url=${encodeURIComponent(server.url)}${server.highlightTool ? `&tool=${encodeURIComponent(server.highlightTool)}` : ""}`}
+                  className="group rounded-xl border border-border/50 bg-card p-5 hover:border-primary/40 hover:bg-muted/20 transition-all"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {server.name}
+                      </p>
+                      {health?.status === "up" && (
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] bg-green-500/10 text-green-500 border border-green-500/20">
+                          <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                          live
+                        </span>
+                      )}
+                    </div>
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0 mt-0.5" />
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                    {server.description}
                   </p>
-                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0 mt-0.5" />
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                  {server.description}
-                </p>
-                {server.tryPrompt && (
-                  <p className="text-xs text-primary/70 italic">{server.tryPrompt}</p>
-                )}
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {server.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-1.5 py-0.5 rounded text-[10px] bg-muted/50 text-muted-foreground border border-border/30"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </Link>
-            ))}
+                  {server.tryPrompt && (
+                    <p className="text-xs text-primary/70 italic">{server.tryPrompt}</p>
+                  )}
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {server.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-1.5 py-0.5 rounded text-[10px] bg-muted/50 text-muted-foreground border border-border/30"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
           <div className="text-center mt-6">
             <Link
