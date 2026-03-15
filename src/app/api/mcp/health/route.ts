@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { validateMcpUrl } from "@/lib/api-security";
 
 export type HealthStatus = "up" | "auth_required" | "down" | "unknown";
 
@@ -17,15 +18,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing url param" }, { status: 400 });
   }
 
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
-  }
-
-  if (!["http:", "https:"].includes(parsed.protocol)) {
-    return NextResponse.json({ error: "Only http/https allowed" }, { status: 400 });
+  // Validate URL + DNS resolution (blocks SSRF)
+  const isProduction = process.env.NODE_ENV === "production";
+  const urlCheck = await validateMcpUrl(url, isProduction);
+  if ("error" in urlCheck) {
+    return NextResponse.json({ error: urlCheck.error }, { status: 400 });
   }
 
   const controller = new AbortController();

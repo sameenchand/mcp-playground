@@ -1,38 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { inspectMcpServer } from "@/lib/mcp-client";
+import { checkRateLimit, validateMcpUrl, getClientIp } from "@/lib/api-security";
 
-// In-memory rate limiter: IP -> array of timestamps
 const rateLimitMap = new Map<string, number[]>();
-const RATE_LIMIT_MAX = 20;
-const RATE_LIMIT_WINDOW_MS = 60_000;
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = (rateLimitMap.get(ip) ?? []).filter(
-    (t) => now - t < RATE_LIMIT_WINDOW_MS,
-  );
-  if (timestamps.length >= RATE_LIMIT_MAX) return true;
-  timestamps.push(now);
-  rateLimitMap.set(ip, timestamps);
-  return false;
-}
-
-// Block private/internal IP ranges and localhost
-const PRIVATE_IP_PATTERNS = [
-  /^localhost$/i,
-  /^127\./,
-  /^10\./,
-  /^172\.(1[6-9]|2\d|3[01])\./,
-  /^192\.168\./,
-  /^::1$/,
-  /^fc00:/i,
-  /^fe80:/i,
-];
-
-function isPrivateHostname(hostname: string): boolean {
-  return PRIVATE_IP_PATTERNS.some((pattern) => pattern.test(hostname));
-}
 
 const RequestSchema = z.object({
   url: z
@@ -46,20 +17,15 @@ const RequestSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  // Rate limiting
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown";
+  const ip = getClientIp(req);
 
-  if (isRateLimited(ip)) {
+  if (checkRateLimit(rateLimitMap, ip, 20, 60_000)) {
     return NextResponse.json(
       { error: "Too many requests. Please wait a minute before trying again." },
       { status: 429 },
     );
   }
 
-  // Parse and validate body
   let body: unknown;
   try {
     body = await req.json();
@@ -77,19 +43,11 @@ export async function POST(req: NextRequest) {
 
   const { url, headers } = parsed.data;
 
-  // Block private IPs/localhost
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(url);
-  } catch {
-    return NextResponse.json({ error: "That doesn't look like a valid URL." }, { status: 400 });
-  }
-
-  if (isPrivateHostname(parsedUrl.hostname) && process.env.NODE_ENV === "production") {
-    return NextResponse.json(
-      { error: "Connections to private or local addresses are not allowed." },
-      { status: 400 },
-    );
+  // Validate URL + DNS resolution (blocks SSRF, cloud metadata, DNS rebinding)
+  const isProduction = process.env.NODE_ENV === "production";
+  const urlCheck = await validateMcpUrl(url, isProduction);
+  if ("error" in urlCheck) {
+    return NextResponse.json({ error: urlCheck.error }, { status: 400 });
   }
 
   // Connect and inspect

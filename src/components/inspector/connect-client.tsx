@@ -117,7 +117,7 @@ function HeadersEditor({
         Add header
       </button>
       <p className="text-[10px] text-muted-foreground/50">
-        Headers are only stored in your browser session and never sent to our servers.
+        Headers are stored in your browser session and only forwarded to the MCP server you connect to. We don&apos;t log or persist them.
       </p>
     </div>
   );

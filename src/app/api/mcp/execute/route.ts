@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
   const { url, toolName, args, headers } = parsed.data;
   const isProduction = process.env.NODE_ENV === "production";
-  const urlCheck = validateMcpUrl(url, isProduction ?? false);
+  const urlCheck = await validateMcpUrl(url, isProduction ?? false);
   if ("error" in urlCheck) {
     return NextResponse.json(
       { success: false, error: urlCheck.error, code: "INVALID_INPUT" },

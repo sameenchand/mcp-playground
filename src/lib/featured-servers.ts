@@ -58,6 +58,17 @@ export const featuredServers: FeaturedServer[] = [
     tryPrompt: "Search the MCP registry for servers",
   },
   {
+    id: "jina-ai",
+    name: "Jina AI",
+    description:
+      "Web search, URL reading, and content extraction powered by Jina AI. Generous free tier, no auth needed for basic use.",
+    url: "https://mcp.jina.ai/v1",
+    tags: ["ai", "search", "web"],
+    source: "https://github.com/jina-ai/MCP",
+    highlightTool: "readUrl",
+    tryPrompt: "Read and extract content from any URL",
+  },
+  {
     id: "zapier",
     name: "Zapier MCP",
     description:
