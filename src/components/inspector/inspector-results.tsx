@@ -49,38 +49,45 @@ function ToolCard({ tool, onTry }: { tool: InspectResult["tools"][0]; onTry?: ()
 
   return (
     <div className="rounded-lg border border-border/50 bg-card overflow-hidden">
-      <button
-        className="w-full flex items-center gap-3 p-4 hover:bg-muted/20 transition-colors text-left"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <span className="p-1.5 rounded-md bg-muted border border-border/50 shrink-0">
-          <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="font-mono text-sm font-medium text-foreground">{tool.name}</p>
-          {tool.description && (
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">{tool.description}</p>
-          )}
-        </div>
+      {/* Header row — split into clickable expand area and action buttons */}
+      <div className="flex items-center gap-3 p-4 hover:bg-muted/20 transition-colors">
+        <button
+          className="flex items-center gap-3 flex-1 min-w-0 text-left"
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+        >
+          <span className="p-1.5 rounded-md bg-muted border border-border/50 shrink-0">
+            <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="font-mono text-sm font-medium text-foreground">{tool.name}</p>
+            {tool.description && (
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">{tool.description}</p>
+            )}
+          </div>
+        </button>
         <div className="flex items-center gap-2 shrink-0">
           {onTry && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onTry();
-              }}
+              onClick={onTry}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
             >
               Try it <ArrowRight className="h-3 w-3" />
             </button>
           )}
-          {expanded ? (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          )}
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={expanded ? "Collapse" : "Expand"}
+          >
+            {expanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
         </div>
-      </button>
+      </div>
 
       {expanded && (
         <div className="px-4 pb-4 border-t border-border/30 pt-3">

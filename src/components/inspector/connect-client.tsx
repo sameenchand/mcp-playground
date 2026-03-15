@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Loader2, AlertCircle, ExternalLink, Zap, Play } from "lucide-react";
+import { Search, Loader2, AlertCircle, ExternalLink, Zap, Play, Lock } from "lucide-react";
 import { featuredServers, type FeaturedServer } from "@/lib/featured-servers";
 import { InspectorResults } from "@/components/inspector/inspector-results";
 import type { InspectResult } from "@/lib/mcp-client";
@@ -44,6 +44,12 @@ function FeaturedServerCard({
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{server.description}</p>
           <p className="font-mono text-xs text-muted-foreground/60 mt-2 truncate">{server.url}</p>
           <div className="flex flex-wrap gap-1 mt-2">
+            {server.requiresAuth && (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                <Lock className="h-2.5 w-2.5" />
+                requires auth
+              </span>
+            )}
             {server.tags.map((tag) => (
               <span
                 key={tag}
@@ -53,6 +59,11 @@ function FeaturedServerCard({
               </span>
             ))}
           </div>
+          {server.authNote && (
+            <p className="text-xs text-yellow-600/80 dark:text-yellow-400/70 mt-1.5 italic">
+              {server.authNote}
+            </p>
+          )}
         </div>
         {server.source && (
           <a
