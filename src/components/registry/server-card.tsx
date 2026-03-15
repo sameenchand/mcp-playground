@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Wifi, Package } from "lucide-react";
+import { Wifi, Package, Terminal } from "lucide-react";
 import type { MCPServer } from "@/lib/registry-api";
 
 interface ServerCardProps {
@@ -12,6 +12,7 @@ export function ServerCard({ server }: ServerCardProps) {
   const category = server.categories?.[0] ?? server.tags?.[0];
   const hasRemote = Boolean(server.remoteUrl);
   const requiresAuth = (server.remoteHeaders ?? []).some((h) => h.isRequired);
+  const hasNpm = server.packages?.some((p) => p.registry_name === "npm");
 
   // Encode the ID so slashes (e.g. "agency.lona/trading") don't break routing
   const href = `/server/${encodeURIComponent(server.id)}`;
@@ -34,6 +35,12 @@ export function ServerCard({ server }: ServerCardProps) {
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground border border-border/30">
                   <Package className="h-2.5 w-2.5" />
                   local
+                </span>
+              )}
+              {hasNpm && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                  <Terminal className="h-2.5 w-2.5" />
+                  browser
                 </span>
               )}
               {server.version && (

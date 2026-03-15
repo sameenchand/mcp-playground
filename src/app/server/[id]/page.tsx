@@ -224,6 +224,37 @@ export default async function ServerPage({ params }: ServerPageProps) {
           <p className="text-sm text-muted-foreground mb-4">
             Run this server locally and connect via its HTTP endpoint, or use it directly with Claude Desktop.
           </p>
+          {/* Try in Browser — npm packages only */}
+          {npmPackage?.name && (
+            <div className="mb-4">
+              <Link
+                href={`/playground/sandbox?package=${encodeURIComponent(npmPackage.name)}${npmPackage.version ? `&version=${encodeURIComponent(npmPackage.version)}` : ""}`}
+                className={buttonVariants({ variant: "default" })}
+              >
+                <Terminal className="h-4 w-4 mr-2" />
+                Try in Browser
+              </Link>
+              <p className="text-xs text-muted-foreground mt-2">
+                Runs entirely in your browser via WebContainers — no install needed.
+              </p>
+            </div>
+          )}
+          {pypiPackage?.name && !npmPackage?.name && (
+            <div className="mb-4">
+              <button
+                disabled
+                className={buttonVariants({ variant: "outline" }) + " opacity-50 cursor-not-allowed"}
+                title="In-browser execution supports Node.js packages only"
+              >
+                <Terminal className="h-4 w-4 mr-2" />
+                Try in Browser
+              </button>
+              <p className="text-xs text-muted-foreground mt-2">
+                In-browser execution supports Node.js packages only. Python support coming soon.
+              </p>
+            </div>
+          )}
+
           <div className="space-y-3">
             {npmPackage?.name && (
               <InstallBlock

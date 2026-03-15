@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Play, Clock, Search, Trash2, Zap } from "lucide-react";
+import Link from "next/link";
+import { Play, Clock, Search, Trash2, Zap, Terminal, ArrowRight } from "lucide-react";
 import { curatedServers } from "@/lib/featured-servers";
 
 interface RecentServer {
@@ -131,6 +132,30 @@ export function PlaygroundLanding() {
           </div>
         </section>
       )}
+
+      {/* In-browser sandbox callout */}
+      <section className="mb-10">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-border/50" />
+          <p className="text-sm text-muted-foreground">or run an npm package in your browser</p>
+          <div className="h-px flex-1 bg-border/50" />
+        </div>
+        <Link
+          href="/playground/sandbox"
+          className="flex items-center gap-3 rounded-lg border border-purple-500/20 bg-purple-500/5 p-4 hover:border-purple-500/40 hover:bg-purple-500/10 transition-all group"
+        >
+          <Terminal className="h-5 w-5 text-purple-400 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm text-foreground group-hover:text-purple-400 transition-colors">
+              In-Browser Sandbox
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Run any npm MCP server package directly in your browser — no install needed.
+            </p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-400 transition-colors shrink-0" />
+        </Link>
+      </section>
 
       {/* Featured servers */}
       <section>
