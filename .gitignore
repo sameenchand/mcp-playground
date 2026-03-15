@@ -43,3 +43,4 @@ next-env.d.ts
 # project planning / AI context files
 CLAUDE.md
 mcp-playground-plan.md
+.claude

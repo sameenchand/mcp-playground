@@ -93,7 +93,46 @@ export async function installPackage(
 }
 
 /**
+ * Resolve the binary command for a package by reading its package.json `bin` field.
+ * Falls back to package name if bin can't be resolved.
+ */
+async function resolveBin(
+  container: WebContainer,
+  packageName: string,
+): Promise<string> {
+  try {
+    const pkgJsonStr = await container.fs.readFile(
+      `node_modules/${packageName}/package.json`,
+      "utf-8",
+    );
+    const pkgJson = JSON.parse(pkgJsonStr) as {
+      bin?: string | Record<string, string>;
+      main?: string;
+    };
+
+    if (typeof pkgJson.bin === "string") {
+      return `node_modules/${packageName}/${pkgJson.bin}`;
+    }
+    if (typeof pkgJson.bin === "object" && pkgJson.bin !== null) {
+      // Use the first bin entry
+      const firstBin = Object.values(pkgJson.bin)[0];
+      if (firstBin) return `node_modules/${packageName}/${firstBin}`;
+    }
+    if (pkgJson.main) {
+      return `node_modules/${packageName}/${pkgJson.main}`;
+    }
+  } catch {
+    // Fall through to npx fallback
+  }
+
+  // Fallback: use npx to resolve
+  return "";
+}
+
+/**
  * Spawn an MCP server process inside the WebContainer.
+ * Resolves the binary from the installed package and runs it directly,
+ * bypassing npx for more reliable startup.
  * Returns the process handle whose stdin/stdout can be used for MCP communication.
  */
 export async function spawnServer(
@@ -102,9 +141,21 @@ export async function spawnServer(
   args: string[] = [],
   env: Record<string, string> = {},
 ): Promise<WebContainerProcess> {
-  const process = await container.spawn("npx", ["-y", packageName, ...args], {
-    env: { ...env, NODE_ENV: "production" },
-  });
+  const binPath = await resolveBin(container, packageName);
+
+  let process: WebContainerProcess;
+
+  if (binPath) {
+    // Run the binary directly with node — most reliable in WebContainer
+    process = await container.spawn("node", [binPath, ...args], {
+      env: { ...env, NODE_ENV: "production" },
+    });
+  } else {
+    // Fallback: use npx (package already installed, no -y needed)
+    process = await container.spawn("npx", [packageName, ...args], {
+      env: { ...env, NODE_ENV: "production" },
+    });
+  }
 
   return process;
 }

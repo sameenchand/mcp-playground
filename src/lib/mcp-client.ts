@@ -47,13 +47,13 @@ export interface InspectResult {
   tools: ToolSchema[];
   resources: ResourceInfo[];
   prompts: PromptInfo[];
-  transport: "streamable-http" | "sse";
+  transport: "streamable-http" | "sse" | "stdio";
   connectionTimeMs: number;
 }
 
 export interface ConnectedClient {
   client: Client;
-  transport: "streamable-http" | "sse";
+  transport: "streamable-http" | "sse" | "stdio";
   connectionTimeMs: number;
 }
 

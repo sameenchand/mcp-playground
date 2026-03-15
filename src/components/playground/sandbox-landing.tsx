@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Package, Play, Terminal, Globe, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -18,30 +17,36 @@ interface FeaturedNpmServer {
 
 const featuredNpmServers: FeaturedNpmServer[] = [
   {
-    id: "mcp-server-fetch",
-    name: "Fetch",
-    packageName: "@anthropic-ai/mcp-server-fetch",
-    description: "Fetch and extract content from URLs. Lightweight and works great in-browser.",
-    highlightTool: "fetch",
-  },
-  {
     id: "mcp-server-everything",
     name: "Everything",
-    packageName: "@anthropic-ai/mcp-server-everything",
+    packageName: "@modelcontextprotocol/server-everything",
     description: "Test server with sample tools, resources, and prompts. Perfect for exploring the MCP protocol.",
   },
   {
     id: "mcp-server-memory",
     name: "Memory",
-    packageName: "@anthropic-ai/mcp-server-memory",
-    description: "A simple key-value memory store. Great for testing persistent state across tool calls.",
+    packageName: "@modelcontextprotocol/server-memory",
+    description: "A knowledge graph memory store. Great for testing persistent state across tool calls.",
+  },
+  {
+    id: "mcp-server-sequential-thinking",
+    name: "Sequential Thinking",
+    packageName: "@modelcontextprotocol/server-sequential-thinking",
+    description: "A thinking tool that helps break down complex problems into sequential steps.",
   },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+// WebContainers requires cross-origin isolation (COEP + COOP headers).
+// Those headers are only present on a full server-side page load, NOT on
+// Next.js client-side navigation. So we always use window.location.href
+// (hard navigation) when going to /playground/sandbox.
+function navigateToSandbox(params: URLSearchParams) {
+  window.location.href = `/playground/sandbox?${params.toString()}`;
+}
+
 export function SandboxLanding() {
-  const router = useRouter();
   const [packageInput, setPackageInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -68,14 +73,14 @@ export function SandboxLanding() {
 
     const params = new URLSearchParams({ package: name });
     if (version) params.set("version", version);
-    router.push(`/playground/sandbox?${params.toString()}`);
+    navigateToSandbox(params);
   };
 
   const handleFeaturedClick = (server: FeaturedNpmServer) => {
     const params = new URLSearchParams({ package: server.packageName });
     if (server.version) params.set("version", server.version);
     if (server.highlightTool) params.set("tool", server.highlightTool);
-    router.push(`/playground/sandbox?${params.toString()}`);
+    navigateToSandbox(params);
   };
 
   return (
@@ -104,7 +109,7 @@ export function SandboxLanding() {
             type="text"
             value={packageInput}
             onChange={(e) => setPackageInput(e.target.value)}
-            placeholder="@anthropic-ai/mcp-server-fetch"
+            placeholder="@modelcontextprotocol/server-everything"
             className="w-full h-11 pl-10 pr-4 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
           />
         </div>

@@ -233,11 +233,13 @@ export function ConnectClient({
   const [showHeaders, setShowHeaders] = useState(false);
 
   // Pre-populate header names from URL params (e.g. linked from server detail page)
-  // or restore saved headers from sessionStorage
+  // or restore saved headers from sessionStorage.
+  // Also auto-triggers inspect when a URL is pre-filled with no auth requirements.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // First try: pre-fill from headerNames param (from server detail link)
+    // Case 1: server detail page linked us with specific header names to fill in
+    // (auth required — show the panel, don't auto-inspect, wait for user to fill keys)
     if (initialHeaderNames) {
       try {
         const parsed = JSON.parse(initialHeaderNames) as Array<{ name: string; description?: string }>;
@@ -250,17 +252,19 @@ export function ConnectClient({
             })),
           );
           setShowHeaders(true);
-          return; // Don't override with sessionStorage
         }
       } catch {}
+      return;
     }
 
-    // Second try: restore from sessionStorage
+    // Case 2: no auth required — restore any previously saved headers and auto-inspect
     if (initialUrl) {
+      let restoredHeaders: Record<string, string> = {};
       try {
         const stored = sessionStorage.getItem(`mcp_headers_${btoa(initialUrl)}`);
         if (stored) {
           const parsed = JSON.parse(stored) as Record<string, string>;
+          restoredHeaders = parsed;
           const entries = Object.entries(parsed).map(([name, value]) => ({
             id: crypto.randomUUID(),
             name,
@@ -272,7 +276,11 @@ export function ConnectClient({
           }
         }
       } catch {}
+
+      // Auto-inspect — pass the restored headers directly since state hasn't updated yet
+      void inspect(initialUrl, restoredHeaders);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialUrl, initialHeaderNames]);
 
   const headersAsRecord = (): Record<string, string> => {
@@ -289,7 +297,7 @@ export function ConnectClient({
     (e) => e.name.trim() && e.value.trim(),
   ).length;
 
-  const inspect = async (targetUrl: string) => {
+  const inspect = async (targetUrl: string, overrideHeaders?: Record<string, string>) => {
     if (!targetUrl.trim()) return;
 
     setUrl(targetUrl);
@@ -297,7 +305,7 @@ export function ConnectClient({
     await new Promise((r) => setTimeout(r, 400));
     setState({ status: "inspecting", step: STATUS_STEPS.inspecting });
 
-    const headers = headersAsRecord();
+    const headers = overrideHeaders ?? headersAsRecord();
 
     try {
       const res = await fetch("/api/mcp/inspect", {

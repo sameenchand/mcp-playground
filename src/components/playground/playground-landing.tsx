@@ -140,7 +140,7 @@ export function PlaygroundLanding() {
           <p className="text-sm text-muted-foreground">or run an npm package in your browser</p>
           <div className="h-px flex-1 bg-border/50" />
         </div>
-        <Link
+        <a
           href="/playground/sandbox"
           className="flex items-center gap-3 rounded-lg border border-purple-500/20 bg-purple-500/5 p-4 hover:border-purple-500/40 hover:bg-purple-500/10 transition-all group"
         >
@@ -154,7 +154,7 @@ export function PlaygroundLanding() {
             </p>
           </div>
           <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-400 transition-colors shrink-0" />
-        </Link>
+        </a>
       </section>
 
       {/* Featured servers */}

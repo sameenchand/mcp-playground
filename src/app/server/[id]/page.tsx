@@ -181,17 +181,17 @@ export default async function ServerPage({ params }: ServerPageProps) {
           {!requiresAuth ? (
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href={`/connect?url=${encodeURIComponent(server.remoteUrl!)}`}
+                href={`/playground?url=${encodeURIComponent(server.remoteUrl!)}`}
                 className={buttonVariants({ variant: "default" })}
               >
                 <Zap className="h-4 w-4 mr-2" />
-                Inspect Live
+                Inspect &amp; Test Live
               </Link>
               <Link
-                href={`/playground?url=${encodeURIComponent(server.remoteUrl!)}`}
+                href={`/connect?url=${encodeURIComponent(server.remoteUrl!)}`}
                 className={buttonVariants({ variant: "outline" })}
               >
-                Open in Playground
+                Inspect Only
               </Link>
             </div>
           ) : (
@@ -227,13 +227,16 @@ export default async function ServerPage({ params }: ServerPageProps) {
           {/* Try in Browser — npm packages only */}
           {npmPackage?.name && (
             <div className="mb-4">
-              <Link
+              {/* Hard navigation required — WebContainers needs COEP/COOP headers
+                  which are only present on a fresh server-side page load, not
+                  Next.js client-side navigation */}
+              <a
                 href={`/playground/sandbox?package=${encodeURIComponent(npmPackage.name)}${npmPackage.version ? `&version=${encodeURIComponent(npmPackage.version)}` : ""}`}
                 className={buttonVariants({ variant: "default" })}
               >
                 <Terminal className="h-4 w-4 mr-2" />
                 Try in Browser
-              </Link>
+              </a>
               <p className="text-xs text-muted-foreground mt-2">
                 Runs entirely in your browser via WebContainers — no install needed.
               </p>
