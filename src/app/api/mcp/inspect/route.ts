@@ -42,6 +42,7 @@ const RequestSchema = z.object({
       (val) => val.startsWith("http://") || val.startsWith("https://"),
       "URL must start with http:// or https://",
     ),
+  headers: z.record(z.string(), z.string()).optional().default({}),
 });
 
 export async function POST(req: NextRequest) {
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { url } = parsed.data;
+  const { url, headers } = parsed.data;
 
   // Block private IPs/localhost
   let parsedUrl: URL;
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
 
   // Connect and inspect
   try {
-    const result = await inspectMcpServer(url);
+    const result = await inspectMcpServer(url, { headers });
     return NextResponse.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

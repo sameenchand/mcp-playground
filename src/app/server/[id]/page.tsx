@@ -15,6 +15,7 @@ import { buttonVariants } from "@/lib/button-variants";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CopyButton } from "@/components/ui/copy-button";
+import { ServerHealth } from "@/components/registry/server-health";
 import { fetchServerById } from "@/lib/registry-api";
 
 interface ServerPageProps {
@@ -141,12 +142,15 @@ export default async function ServerPage({ params }: ServerPageProps) {
             Remote Endpoint
           </h2>
 
-          {/* URL */}
+          {/* URL + live status */}
           <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/50 px-4 py-2.5 mb-4">
             <code className="flex-1 text-sm font-mono text-foreground break-all">
               {server.remoteUrl}
             </code>
             <CopyButton value={server.remoteUrl!} />
+          </div>
+          <div className="mb-4">
+            <ServerHealth url={server.remoteUrl!} />
           </div>
 
           {/* Auth requirements */}

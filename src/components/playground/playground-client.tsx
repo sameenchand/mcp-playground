@@ -98,6 +98,16 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
 
   const [toast, setToast] = useState<string | null>(null);
 
+  // Read auth headers saved by ConnectClient into sessionStorage
+  const [authHeaders, setAuthHeaders] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = sessionStorage.getItem(`mcp_headers_${btoa(serverUrl)}`);
+      if (stored) setAuthHeaders(JSON.parse(stored) as Record<string, string>);
+    } catch {}
+  }, [serverUrl]);
+
   // ── Auto-inspect on mount ──────────────────────────────────────────────────
   useEffect(() => {
     async function doInspect() {
@@ -106,7 +116,7 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
         const res = await fetch("/api/mcp/inspect", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: serverUrl }),
+          body: JSON.stringify({ url: serverUrl, headers: authHeaders }),
         });
         const data = await res.json() as unknown;
         if (!res.ok) {
@@ -129,7 +139,7 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
     }
     void doInspect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverUrl]);
+  }, [serverUrl, authHeaders]);
 
   // ── Derived ────────────────────────────────────────────────────────────────
   const selectedTool: ToolSchema | null =
@@ -170,7 +180,7 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
         const res = await fetch("/api/mcp/execute", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: serverUrl, toolName: selectedToolName, args }),
+          body: JSON.stringify({ url: serverUrl, toolName: selectedToolName, args, headers: authHeaders }),
         });
         const data = (await res.json()) as ExecuteResponse;
         const execTime = data.executionTimeMs ?? Date.now() - startTime;

@@ -11,6 +11,7 @@ const RequestSchema = z.object({
   url: z.string().url(),
   toolName: z.string().min(1, "toolName is required"),
   args: z.record(z.string(), z.unknown()).default({}),
+  headers: z.record(z.string(), z.string()).optional().default({}),
 });
 
 export async function POST(req: NextRequest) {
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { url, toolName, args } = parsed.data;
+  const { url, toolName, args, headers } = parsed.data;
   const isProduction = process.env.NODE_ENV === "production";
   const urlCheck = validateMcpUrl(url, isProduction ?? false);
   if ("error" in urlCheck) {
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
   // Connect to server
   let connected: Awaited<ReturnType<typeof connectToServer>>;
   try {
-    connected = await connectToServer(url);
+    connected = await connectToServer(url, { headers });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg === "TIMEOUT") {

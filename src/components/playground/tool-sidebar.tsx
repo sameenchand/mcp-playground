@@ -31,14 +31,14 @@ export function ToolSidebar({ tools, selectedTool, onSelect }: ToolSidebarProps)
           <span className="text-xs text-muted-foreground/60">{tools.length}</span>
         </div>
 
-        {tools.length > 8 && (
+        {tools.length > 4 && (
           <div className="relative mb-2">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Filter tools…"
+              placeholder="Search tools…"
               className="w-full h-7 pl-8 pr-3 text-xs rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/40"
             />
           </div>

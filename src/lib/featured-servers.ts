@@ -7,6 +7,10 @@ export interface FeaturedServer {
   source?: string;
   requiresAuth?: boolean;
   authNote?: string;
+  /** A specific tool to highlight / pre-select in the playground */
+  highlightTool?: string;
+  /** Short example description of what the server does */
+  tryPrompt?: string;
 }
 
 export const featuredServers: FeaturedServer[] = [
@@ -14,19 +18,44 @@ export const featuredServers: FeaturedServer[] = [
     id: "local-test",
     name: "Local Test Server",
     description:
-      "Our own test MCP server with 4 tools, 2 resources, and 2 prompts. Run it locally with `pnpm test-server` to test all playground features.",
+      "A test MCP server with 4 tools (greet, add, get_weather, batch_process), 2 resources, and 2 prompts. Run locally with `pnpm test-server`.",
     url: "http://localhost:3001/mcp",
     tags: ["local", "testing", "demo"],
     source: "scripts/test-server.ts",
+    highlightTool: "get_weather",
+    tryPrompt: "Try the get_weather tool with a city name",
   },
   {
     id: "deepwiki",
     name: "DeepWiki",
     description:
-      "Answers questions about any GitHub repository using AI-powered documentation search. Public endpoint, no auth required.",
+      "Ask questions about any public GitHub repository using AI-powered documentation search. No auth required.",
     url: "https://mcp.deepwiki.com/mcp",
     tags: ["ai", "documentation", "github"],
     source: "https://deepwiki.com",
+    highlightTool: "ask_question",
+    tryPrompt: "Ask anything about a GitHub repo — try 'vercel/next.js'",
+  },
+  {
+    id: "petstore",
+    name: "Petstore API",
+    description:
+      "The classic Swagger Petstore API exposed as MCP tools. Great for testing form types and API patterns. No auth needed.",
+    url: "https://petstore.run.mcp.com.ai/mcp",
+    tags: ["api", "testing", "demo"],
+    source: "https://mcp.com.ai",
+    highlightTool: "getPetById",
+    tryPrompt: "Fetch a pet by ID or list available pets",
+  },
+  {
+    id: "mcp-registry",
+    name: "MCP Registry",
+    description:
+      "Browse and search the official MCP Registry as MCP tools. Discover servers programmatically.",
+    url: "https://registry.run.mcp.com.ai/mcp",
+    tags: ["registry", "discovery"],
+    source: "https://mcp.com.ai",
+    tryPrompt: "Search the MCP registry for servers",
   },
   {
     id: "zapier",
@@ -36,7 +65,7 @@ export const featuredServers: FeaturedServer[] = [
     url: "https://mcp.zapier.com/api/mcp/v1",
     tags: ["automation", "integrations"],
     requiresAuth: true,
-    authNote: "Requires a Zapier API key passed as a Bearer token",
+    authNote: "Requires a Zapier API key as a Bearer token",
     source: "https://zapier.com/mcp",
   },
   {
@@ -51,3 +80,8 @@ export const featuredServers: FeaturedServer[] = [
     source: "https://linear.app",
   },
 ];
+
+/** Servers confirmed to work publicly with no auth — shown in the landing page "Try now" section */
+export const curatedServers = featuredServers.filter(
+  (s) => !s.requiresAuth && s.id !== "local-test",
+);

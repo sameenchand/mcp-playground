@@ -57,6 +57,11 @@ export interface ConnectedClient {
   connectionTimeMs: number;
 }
 
+export interface ConnectionOptions {
+  /** Custom HTTP headers to send with every MCP request (e.g. auth tokens). */
+  headers?: Record<string, string>;
+}
+
 const CONNECTION_TIMEOUT_MS = 10_000;
 
 async function connectWithTimeout(
@@ -99,14 +104,25 @@ function isAuthError(msg: string): boolean {
  * The CALLER is responsible for calling client.close() when done.
  * Throws "TIMEOUT", "UNAUTHORIZED", or "CONNECTION_FAILED" on error.
  */
-export async function connectToServer(url: string): Promise<ConnectedClient> {
+export async function connectToServer(
+  url: string,
+  options: ConnectionOptions = {},
+): Promise<ConnectedClient> {
   const startTime = Date.now();
   const serverUrl = new URL(url);
+  const requestInit: RequestInit | undefined =
+    options.headers && Object.keys(options.headers).length > 0
+      ? { headers: options.headers }
+      : undefined;
+
   let client = new Client({ name: "mcp-playground", version: "1.0.0" });
   let usedTransport: "streamable-http" | "sse" = "streamable-http";
 
   try {
-    const transport = new StreamableHTTPClientTransport(serverUrl);
+    const transport = new StreamableHTTPClientTransport(
+      serverUrl,
+      requestInit ? { requestInit } : undefined,
+    );
     await connectWithTimeout(client, transport);
     usedTransport = "streamable-http";
   } catch (err) {
@@ -119,7 +135,10 @@ export async function connectToServer(url: string): Promise<ConnectedClient> {
     client = new Client({ name: "mcp-playground", version: "1.0.0" });
 
     try {
-      const sseTransport = new SSEClientTransport(serverUrl);
+      const sseTransport = new SSEClientTransport(
+        serverUrl,
+        requestInit ? { requestInit } : undefined,
+      );
       await connectWithTimeout(client, sseTransport);
       usedTransport = "sse";
     } catch (sseErr) {
@@ -137,8 +156,11 @@ export async function connectToServer(url: string): Promise<ConnectedClient> {
  * Connect to an MCP server, inspect it, and return the full inspection result.
  * Manages its own client lifecycle (open + close).
  */
-export async function inspectMcpServer(url: string): Promise<InspectResult> {
-  const { client, transport, connectionTimeMs } = await connectToServer(url);
+export async function inspectMcpServer(
+  url: string,
+  options: ConnectionOptions = {},
+): Promise<InspectResult> {
+  const { client, transport, connectionTimeMs } = await connectToServer(url, options);
 
   try {
     const serverVersion = client.getServerVersion();

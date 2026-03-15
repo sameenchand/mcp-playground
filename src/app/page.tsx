@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Link2, Layers, Zap, Github, Star, Badge } from "lucide-react";
+import { ArrowRight, Link2, Layers, Zap, Github, Star, Badge, ExternalLink } from "lucide-react";
 import { fetchServers } from "@/lib/registry-api";
+import { curatedServers } from "@/lib/featured-servers";
 
 async function getRegistryCount(): Promise<number> {
   try {
@@ -289,6 +290,61 @@ export default async function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Try it now — curated live servers */}
+      <section className="py-16 px-4 border-t border-border/50">
+        <div className="mx-auto max-w-4xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-foreground mb-3">
+              Try it right now — no account needed
+            </h2>
+            <p className="text-muted-foreground">
+              These servers are publicly accessible. Click one to inspect its tools and run them live.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {curatedServers.map((server) => (
+              <Link
+                key={server.id}
+                href={`/playground?url=${encodeURIComponent(server.url)}${server.highlightTool ? `&tool=${encodeURIComponent(server.highlightTool)}` : ""}`}
+                className="group rounded-xl border border-border/50 bg-card p-5 hover:border-primary/40 hover:bg-muted/20 transition-all"
+              >
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {server.name}
+                  </p>
+                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0 mt-0.5" />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                  {server.description}
+                </p>
+                {server.tryPrompt && (
+                  <p className="text-xs text-primary/70 italic">{server.tryPrompt}</p>
+                )}
+                <div className="flex flex-wrap gap-1 mt-3">
+                  {server.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-1.5 py-0.5 rounded text-[10px] bg-muted/50 text-muted-foreground border border-border/30"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="text-center mt-6">
+            <Link
+              href="/explore"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Browse all {100}+ servers in the registry
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </section>
