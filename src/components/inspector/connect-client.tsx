@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Loader2, AlertCircle, ExternalLink, Zap, Play, Lock } from "lucide-react";
+import { Search, Loader2, AlertCircle, ExternalLink, Zap, Play, Lock, KeyRound } from "lucide-react";
 import { featuredServers, type FeaturedServer } from "@/lib/featured-servers";
 import { InspectorResults } from "@/components/inspector/inspector-results";
 import type { InspectResult } from "@/lib/mcp-client";
@@ -13,6 +13,7 @@ interface ConnectionState {
   status: Status;
   step?: string;
   error?: string;
+  errorCode?: string;
   result?: InspectResult;
 }
 
@@ -141,10 +142,11 @@ export function ConnectClient({ initialUrl }: { initialUrl?: string }) {
       const data = await res.json() as unknown;
 
       if (!res.ok) {
-        const errorData = data as { error?: string };
+        const errorData = data as { error?: string; code?: string };
         setState({
           status: "error",
           error: errorData.error ?? "An unexpected error occurred.",
+          errorCode: errorData.code,
         });
         return;
       }
@@ -204,13 +206,32 @@ export function ConnectClient({ initialUrl }: { initialUrl?: string }) {
 
       {/* Error */}
       {state.status === "error" && state.error && (
-        <div className="flex items-start gap-3 p-4 rounded-lg bg-red-500/5 border border-red-500/20">
-          <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-red-400">Connection failed</p>
-            <p className="text-sm text-muted-foreground mt-0.5">{state.error}</p>
+        state.errorCode === "UNAUTHORIZED" ? (
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-yellow-500/5 border border-yellow-500/20">
+            <KeyRound className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                Authentication required
+              </p>
+              <p className="text-sm text-muted-foreground mt-0.5">{state.error}</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Find this server in the{" "}
+                <a href="/explore" className="text-primary hover:underline underline-offset-4">
+                  registry
+                </a>{" "}
+                to see which API key or token it requires.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-red-500/5 border border-red-500/20">
+            <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-red-400">Connection failed</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{state.error}</p>
+            </div>
+          </div>
+        )
       )}
 
       {/* Results */}

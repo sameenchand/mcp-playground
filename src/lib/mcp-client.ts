@@ -79,10 +79,25 @@ async function connectWithTimeout(
   }
 }
 
+/** Returns true if the error looks like an HTTP 401/403 auth failure. */
+function isAuthError(msg: string): boolean {
+  const lower = msg.toLowerCase();
+  return (
+    lower.includes("401") ||
+    lower.includes("403") ||
+    lower.includes("unauthorized") ||
+    lower.includes("forbidden") ||
+    lower.includes("authentication") ||
+    lower.includes("invalid or missing credentials") ||
+    lower.includes("invalid_token") ||
+    lower.includes("access denied")
+  );
+}
+
 /**
  * Connect to an MCP server and return the live client.
  * The CALLER is responsible for calling client.close() when done.
- * Throws "TIMEOUT" or "CONNECTION_FAILED" on error.
+ * Throws "TIMEOUT", "UNAUTHORIZED", or "CONNECTION_FAILED" on error.
  */
 export async function connectToServer(url: string): Promise<ConnectedClient> {
   const startTime = Date.now();
@@ -97,6 +112,7 @@ export async function connectToServer(url: string): Promise<ConnectedClient> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg === "CONNECTION_TIMEOUT") throw new Error("TIMEOUT");
+    if (isAuthError(msg)) throw new Error("UNAUTHORIZED");
 
     // Fall back to SSE
     await client.close().catch(() => {});
@@ -109,6 +125,7 @@ export async function connectToServer(url: string): Promise<ConnectedClient> {
     } catch (sseErr) {
       const sseMsg = sseErr instanceof Error ? sseErr.message : String(sseErr);
       if (sseMsg === "CONNECTION_TIMEOUT") throw new Error("TIMEOUT");
+      if (isAuthError(sseMsg)) throw new Error("UNAUTHORIZED");
       throw new Error("CONNECTION_FAILED");
     }
   }

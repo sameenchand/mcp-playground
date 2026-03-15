@@ -105,6 +105,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (message === "UNAUTHORIZED") {
+      return NextResponse.json(
+        {
+          error:
+            "This server requires authentication. Check its documentation for the required API key or token.",
+          code: "UNAUTHORIZED",
+        },
+        { status: 401 },
+      );
+    }
+
     if (message === "CONNECTION_FAILED") {
       return NextResponse.json(
         { error: "Couldn't reach this server. Check the URL and make sure it's running." },
