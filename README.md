@@ -4,7 +4,7 @@
 
 Browse the official registry, connect to any remote server, inspect its tools and resources, execute them live — or run any npm MCP package directly in your browser with zero installation.
 
-[Live Demo](https://mcpplayground.dev) | [MCP Protocol](https://modelcontextprotocol.io)
+[Live Demo](https://mcpplayground.tech) | [MCP Protocol](https://modelcontextprotocol.io)
 
 ---
 
