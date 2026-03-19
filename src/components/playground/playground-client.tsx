@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Play, AlertCircle, ChevronDown, Share2, Check, RotateCcw } from "lucide-react";
+import { Loader2, Play, AlertCircle, ChevronDown, Share2, Check, RotateCcw, Code2 } from "lucide-react";
 import { SchemaForm } from "@/components/playground/schema-form";
 import { ResponseViewer, type ToolResult } from "@/components/playground/response-viewer";
 import { HistoryPanel, type HistoryEntry } from "@/components/playground/history-panel";
 import { ToolSidebar } from "@/components/playground/tool-sidebar";
 import { ConnectionHeader } from "@/components/playground/connection-header";
+import { AddToIdeModal } from "@/components/playground/add-to-ide-modal";
 import { saveRecentServer } from "@/components/playground/playground-landing";
 import type { InspectResult, ToolSchema } from "@/lib/mcp-client";
 
@@ -25,10 +26,70 @@ interface PlaygroundClientProps {
   serverUrl: string;
   initialTool?: string;
   initialArgs?: Record<string, unknown>;
+  autoRun?: boolean;
   embedded?: boolean;
 }
 
 const MAX_HISTORY = 50;
+
+// ── Actionable error messages ─────────────────────────────────────────────────
+
+function toActionableError(raw: string): string {
+  const r = raw.toLowerCase();
+  if (r.includes("connection_failed") || r.includes("econnrefused") || r.includes("connection refused")) {
+    return "Could not connect to the server. Check the URL and make sure it is running and publicly accessible.";
+  }
+  if (r.includes("timeout") || r.includes("timed out")) {
+    return "The server took too long to respond. It may be overloaded or the tool is slow to execute.";
+  }
+  if (r.includes("unauthorized") || r.includes("401") || r.includes("403") || r.includes("forbidden")) {
+    return "Authentication required. Add your API key or auth headers via the Connect page.";
+  }
+  if (r.includes("rate_limited") || r.includes("429") || r.includes("too many requests")) {
+    return "Rate limit reached. Please wait a moment before running again.";
+  }
+  if (r.includes("not found") || r.includes("404")) {
+    return "Server endpoint not found. Double-check the URL path.";
+  }
+  if (r.includes("network error") || r.includes("failed to fetch")) {
+    return "Network error — check your internet connection and try again.";
+  }
+  return raw;
+}
+
+// ── localStorage history helpers ──────────────────────────────────────────────
+
+function historyKey(url: string): string {
+  try {
+    return `mcp_hist_${btoa(url)}`;
+  } catch {
+    return "mcp_hist_default";
+  }
+}
+
+function loadHistory(url: string): HistoryEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(historyKey(url));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Array<Record<string, unknown>>;
+    return parsed.map((e) => ({
+      ...e,
+      timestamp: new Date(e.timestamp as string),
+    })) as HistoryEntry[];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(url: string, entries: HistoryEntry[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(historyKey(url), JSON.stringify(entries.slice(0, MAX_HISTORY)));
+  } catch {
+    // Ignore storage errors (quota exceeded, private mode, etc.)
+  }
+}
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 
@@ -75,9 +136,10 @@ function MobileToolSelect({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded = false }: PlaygroundClientProps) {
+export function PlaygroundClient({ serverUrl, initialTool, initialArgs, autoRun, embedded = false }: PlaygroundClientProps) {
   const router = useRouter();
   const submitFnRef = useRef<(() => void) | null>(null);
+  const hasAutoRun = useRef(false);
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [inspectStatus, setInspectStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -94,10 +156,11 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
   const [executeError, setExecuteError] = useState<string | null>(null);
   const [lastWarning, setLastWarning] = useState<string | undefined>(undefined);
 
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>(() => loadHistory(serverUrl));
   const [activeHistoryId, setActiveHistoryId] = useState<string | undefined>(undefined);
 
   const [toast, setToast] = useState<string | null>(null);
+  const [addToIdeOpen, setAddToIdeOpen] = useState(false);
 
   // Read auth headers saved by ConnectClient into sessionStorage
   const [authHeaders, setAuthHeaders] = useState<Record<string, string>>({});
@@ -108,6 +171,11 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
       if (stored) setAuthHeaders(JSON.parse(stored) as Record<string, string>);
     } catch {}
   }, [serverUrl]);
+
+  // Persist history to localStorage whenever it changes
+  useEffect(() => {
+    saveHistory(serverUrl, history);
+  }, [history, serverUrl]);
 
   // ── Inspect logic (reusable for retry) ────────────────────────────────────
   const doInspect = useCallback(async () => {
@@ -122,7 +190,7 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
       const data = await res.json() as unknown;
       if (!res.ok) {
         const err = data as { error?: string };
-        setInspectError(err.error ?? "Failed to connect to server.");
+        setInspectError(toActionableError(err.error ?? "Failed to connect to server."));
         setInspectStatus("error");
         return;
       }
@@ -215,7 +283,7 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
           setLastExecTime(execTime);
           setLastWarning(data.warning);
         } else {
-          setExecuteError(data.error ?? "Execution failed.");
+          setExecuteError(toActionableError(data.error ?? "Execution failed."));
         }
       } catch {
         const execTime = Date.now() - startTime;
@@ -229,7 +297,7 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
           executionTimeMs: execTime,
         };
         setHistory((prev) => [entry, ...prev].slice(0, MAX_HISTORY));
-        setExecuteError("Network error — check your connection.");
+        setExecuteError("Network error — check your internet connection and try again.");
       } finally {
         setExecuteStatus("idle");
       }
@@ -260,14 +328,17 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
     if (selectedToolName) {
       params.set("tool", selectedToolName);
       if (Object.keys(formValues).length > 0) {
-        params.set("args", btoa(JSON.stringify(formValues)));
+        const encoded = btoa(JSON.stringify(formValues));
+        params.set("args", encoded);
+        // If there's a successful result, the shared link will auto-execute
+        if (lastResult) params.set("autorun", "1");
       }
     }
     const shareUrl = `${window.location.origin}/playground?${params.toString()}`;
     void navigator.clipboard.writeText(shareUrl);
-    setToast("Link copied!");
-    setTimeout(() => setToast(null), 2000);
-  }, [serverUrl, selectedToolName, formValues]);
+    setToast(lastResult ? "Execution link copied!" : "Link copied!");
+    setTimeout(() => setToast(null), 2500);
+  }, [serverUrl, selectedToolName, formValues, lastResult]);
 
   // ── Keyboard shortcut: Cmd/Ctrl + Enter ───────────────────────────────────
   useEffect(() => {
@@ -280,6 +351,20 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  // ── Auto-run from shared link (?autorun=1) ─────────────────────────────────
+  useEffect(() => {
+    if (!autoRun || hasAutoRun.current) return;
+    if (inspectStatus !== "ready") return;
+    if (!selectedToolName) return;
+    if (!initialArgs || Object.keys(initialArgs).length === 0) return;
+    hasAutoRun.current = true;
+    const timer = setTimeout(() => {
+      void handleRun(initialArgs);
+    }, 400);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRun, inspectStatus, selectedToolName]);
 
   // ── Loading state ──────────────────────────────────────────────────────────
   if (inspectStatus === "loading") {
@@ -355,14 +440,21 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
         <ConnectionHeader serverUrl={serverUrl} inspectResult={inspectResult} />
       )}
 
-      {/* Toolbar: share button */}
-      <div className="flex items-center justify-end px-4 py-2 border-b border-border/30 bg-background">
+      {/* Toolbar */}
+      <div className="flex items-center justify-end gap-1 px-4 py-2 border-b border-border/30 bg-background">
+        <button
+          onClick={() => setAddToIdeOpen(true)}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted/50"
+        >
+          <Code2 className="h-3.5 w-3.5" />
+          Add to IDE
+        </button>
         <button
           onClick={handleShare}
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted/50"
         >
           <Share2 className="h-3.5 w-3.5" />
-          Share
+          {lastResult ? "Share run" : "Share"}
         </button>
       </div>
 
@@ -490,6 +582,15 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, embedded
 
       {/* Toast */}
       {toast && <Toast message={toast} />}
+
+      {/* Add to IDE modal */}
+      <AddToIdeModal
+        open={addToIdeOpen}
+        onClose={() => setAddToIdeOpen(false)}
+        serverUrl={serverUrl}
+        serverName={inspectResult?.serverInfo.name ?? new URL(serverUrl).hostname}
+        transport={inspectResult?.transport}
+      />
     </div>
   );
 }

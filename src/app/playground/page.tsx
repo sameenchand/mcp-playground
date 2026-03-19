@@ -6,6 +6,7 @@ interface PlaygroundPageProps {
     url?: string;
     tool?: string;
     args?: string;
+    autorun?: string;
   }>;
 }
 
@@ -31,7 +32,7 @@ export async function generateMetadata({ searchParams }: PlaygroundPageProps) {
 }
 
 export default async function PlaygroundPage({ searchParams }: PlaygroundPageProps) {
-  const { url, tool, args: argsParam } = await searchParams;
+  const { url, tool, args: argsParam, autorun } = await searchParams;
 
   if (!url) {
     return <PlaygroundLanding />;
@@ -53,6 +54,7 @@ export default async function PlaygroundPage({ searchParams }: PlaygroundPagePro
         serverUrl={url}
         initialTool={tool}
         initialArgs={initialArgs}
+        autoRun={autorun === "1" && !!initialArgs}
       />
     </div>
   );
