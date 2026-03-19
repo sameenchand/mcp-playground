@@ -460,6 +460,7 @@ function FieldRow({
   required,
   disabled,
   depth,
+  error,
 }: {
   name: string;
   schema: JsonSchema;
@@ -468,6 +469,7 @@ function FieldRow({
   required: boolean;
   disabled?: boolean;
   depth: number;
+  error?: string;
 }) {
   const schema = normalize(rawSchema);
   const type = getType(schema);
@@ -525,25 +527,31 @@ function FieldRow({
           <p className="text-xs text-muted-foreground">{schema.description}</p>
         )}
         {renderInput()}
+        {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-[180px_1fr] items-start gap-4 sm:grid-cols-[200px_1fr]">
-      <div className="pt-2 space-y-1">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-sm font-medium text-foreground">
-            {fieldLabel(name)}
-            {required && <span className="text-red-400 ml-0.5">*</span>}
-          </span>
-          <TypeBadge type={type} />
+    <div className="space-y-0.5">
+      <div className="grid grid-cols-[180px_1fr] items-start gap-4 sm:grid-cols-[200px_1fr]">
+        <div className="pt-2 space-y-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-sm font-medium text-foreground">
+              {fieldLabel(name)}
+              {required && <span className="text-red-400 ml-0.5">*</span>}
+            </span>
+            <TypeBadge type={type} />
+          </div>
+          {schema.description && (
+            <p className="text-xs text-muted-foreground/70 leading-relaxed">{schema.description}</p>
+          )}
         </div>
-        {schema.description && (
-          <p className="text-xs text-muted-foreground/70 leading-relaxed">{schema.description}</p>
-        )}
+        <div className={`${type === "boolean" ? "pt-2" : ""} ${error ? "rounded-md ring-1 ring-red-500/40" : ""}`}>
+          {renderInput()}
+        </div>
       </div>
-      <div className={type === "boolean" ? "pt-2" : ""}>{renderInput()}</div>
+      {error && <p className="text-xs text-red-400 mt-0.5">{error}</p>}
     </div>
   );
 }
@@ -557,6 +565,7 @@ function FieldList({
   onUpdate,
   disabled,
   depth,
+  errors = {},
 }: {
   properties: Record<string, JsonSchema>;
   required: string[];
@@ -564,6 +573,7 @@ function FieldList({
   onUpdate: (key: string, value: unknown) => void;
   disabled?: boolean;
   depth: number;
+  errors?: Record<string, string>;
 }) {
   const entries = Object.entries(properties);
   const reqEntries = entries.filter(([k]) => required.includes(k));
@@ -581,6 +591,7 @@ function FieldList({
           required
           disabled={disabled}
           depth={depth}
+          error={errors[k]}
         />
       ))}
 
@@ -627,6 +638,7 @@ export function SchemaForm({
     initialValues ?? initFromTopSchema(schema),
   );
   const formRef = useRef<HTMLFormElement>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Re-initialize when schema or initialValues change
   useEffect(() => {
@@ -640,10 +652,39 @@ export function SchemaForm({
 
   const updateField = useCallback((key: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [key]: value }));
+    // Clear the error for this field as soon as the user edits it
+    setFormErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields before submitting
+    const errs: Record<string, string> = {};
+    for (const key of required) {
+      const s = normalize((properties[key] ?? {}) as JsonSchema);
+      const type = getType(s);
+      // Booleans, enums, objects, arrays always have a valid initial state
+      if (type === "boolean" || type === "enum" || type === "object" || type === "array") continue;
+      const val = values[key];
+      if (type === "number" || type === "integer") {
+        if (val === "" || val === undefined || val === null) errs[key] = "This field is required";
+        continue;
+      }
+      if (!val || (typeof val === "string" && val.trim() === "")) {
+        errs[key] = "This field is required";
+      }
+    }
+    if (Object.keys(errs).length > 0) {
+      setFormErrors(errs);
+      return;
+    }
+    setFormErrors({});
 
     // Coerce all values using the schema
     const coerced: Record<string, unknown> = {};
@@ -679,6 +720,7 @@ export function SchemaForm({
         onUpdate={updateField}
         disabled={disabled || isLoading}
         depth={0}
+        errors={formErrors}
       />
     </form>
   );
