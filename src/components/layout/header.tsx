@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/explore", label: "Explore" },
   { href: "/connect", label: "Connect" },
   { href: "/playground", label: "Playground" },
+  { href: "/docs", label: "Docs" },
   { href: "/about", label: "About" },
 ];
 
@@ -63,7 +64,7 @@ export function Header() {
               href={link.href}
               className={cn(
                 "px-3 py-1.5 rounded-md text-sm font-medium transition-colors hidden sm:block",
-                pathname === link.href
+                pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href + "/"))
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
               )}
