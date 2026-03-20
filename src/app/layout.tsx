@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL ?? "https://mcpplayground.dev"
+    process.env.NEXT_PUBLIC_BASE_URL ?? "https://mcpplayground.tech"
   ),
   title: {
     default: "MCP Playground — Test Any MCP Server in Your Browser",

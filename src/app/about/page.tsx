@@ -50,7 +50,7 @@ export default function AboutPage() {
           <h2 className="text-lg font-semibold text-foreground mb-3">
             What you can do
           </h2>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 title: "Browse the Registry",
@@ -58,11 +58,19 @@ export default function AboutPage() {
               },
               {
                 title: "Connect & Inspect",
-                desc: "Connect to any remote MCP server (Streamable HTTP or SSE). View all tools, resources, and prompts with their schemas.",
+                desc: "Connect to any remote MCP server via Streamable HTTP, SSE, or WebSocket. View all tools, resources, and prompts with their schemas.",
               },
               {
                 title: "Test Tools Interactively",
                 desc: "Auto-generated forms from JSON Schema. Fill in arguments, execute, see results — with full execution history.",
+              },
+              {
+                title: "Schema Linter",
+                desc: "Grade any MCP server A–F with 15+ lint rules. Check tool descriptions, JSON Schema completeness, and token cost estimates.",
+              },
+              {
+                title: "Public REST API",
+                desc: "Programmatic access to inspect, lint, health-check, and browse the registry. CORS-enabled with rate limiting.",
               },
               {
                 title: "In-Browser Sandbox",
@@ -75,6 +83,10 @@ export default function AboutPage() {
               {
                 title: "Share & Embed",
                 desc: "Shareable links with auto-run. Embeddable iframes for docs. README badges for instant demos.",
+              },
+              {
+                title: "Auth Headers",
+                desc: "Bring your own API keys and authorization headers. Session storage only — never sent to our servers.",
               },
             ].map((item) => (
               <div
