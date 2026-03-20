@@ -322,7 +322,15 @@ export function WebContainerPlayground({
         {/* Left: tool list + history */}
         <aside className="hidden lg:flex flex-col border-r border-border/30 bg-muted/5 overflow-hidden">
           <div className="flex-1 overflow-y-auto p-3">
-            <ToolSidebar tools={tools} selectedTool={selectedToolName} onSelect={handleSelectTool} />
+            <ToolSidebar
+              tools={tools}
+              resources={[]}
+              prompts={[]}
+              activeTab="tools"
+              onTabChange={() => {}}
+              selectedItem={selectedToolName}
+              onSelect={handleSelectTool}
+            />
           </div>
 
           {history.length > 0 && (
