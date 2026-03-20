@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Play, AlertCircle, ChevronDown, Share2, Check, RotateCcw, Code2 } from "lucide-react";
+import { Loader2, Play, AlertCircle, ChevronDown, Share2, Check, RotateCcw, Code2, Radio } from "lucide-react";
 import { SchemaForm } from "@/components/playground/schema-form";
 import { ResponseViewer, type ToolResult } from "@/components/playground/response-viewer";
 import { HistoryPanel, type HistoryEntry } from "@/components/playground/history-panel";
 import { ToolSidebar, type PlaygroundTab } from "@/components/playground/tool-sidebar";
 import { ResourceViewer } from "@/components/playground/resource-viewer";
 import { PromptViewer } from "@/components/playground/prompt-viewer";
+import { TrafficViewer, type TrafficEntry } from "@/components/playground/traffic-viewer";
 import { ConnectionHeader } from "@/components/playground/connection-header";
 import { AddToIdeModal } from "@/components/playground/add-to-ide-modal";
 import { saveRecentServer } from "@/components/playground/playground-landing";
@@ -22,6 +23,7 @@ interface ExecuteResponse {
   executionTimeMs?: number;
   error?: string;
   warning?: string;
+  traffic?: TrafficEntry[];
 }
 
 interface PlaygroundClientProps {
@@ -166,6 +168,11 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, autoRun,
   const [toast, setToast] = useState<string | null>(null);
   const [addToIdeOpen, setAddToIdeOpen] = useState(false);
 
+  // Traffic inspector
+  const [logTraffic, setLogTraffic] = useState(false);
+  const [trafficLog, setTrafficLog] = useState<TrafficEntry[]>([]);
+  const [responseTab, setResponseTab] = useState<"response" | "traffic">("response");
+
   // Read auth headers saved by ConnectClient into sessionStorage
   const [authHeaders, setAuthHeaders] = useState<Record<string, string>>({});
   useEffect(() => {
@@ -291,16 +298,23 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, autoRun,
       setLastResult(null);
       setLastExecTime(null);
       setLastWarning(undefined);
+      setTrafficLog([]);
 
       const startTime = Date.now();
       try {
         const res = await fetch("/api/mcp/execute", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: serverUrl, toolName: selectedToolName, args, headers: authHeaders }),
+          body: JSON.stringify({ url: serverUrl, toolName: selectedToolName, args, headers: authHeaders, logTraffic }),
         });
         const data = (await res.json()) as ExecuteResponse;
         const execTime = data.executionTimeMs ?? Date.now() - startTime;
+
+        // Capture traffic
+        if (data.traffic) {
+          setTrafficLog(data.traffic);
+          if (logTraffic) setResponseTab("traffic");
+        }
 
         const entry: HistoryEntry = {
           id: crypto.randomUUID(),
@@ -492,6 +506,19 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, autoRun,
       {/* Toolbar */}
       <div className="flex items-center justify-end gap-1 px-4 py-2 border-b border-border/30 bg-background">
         <button
+          onClick={() => setLogTraffic((v) => !v)}
+          className={`flex items-center gap-1.5 text-xs transition-colors px-2.5 py-1.5 rounded-md ${
+            logTraffic
+              ? "text-primary bg-primary/10 border border-primary/20"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          }`}
+          title={logTraffic ? "Traffic inspector enabled" : "Enable traffic inspector"}
+        >
+          <Radio className="h-3.5 w-3.5" />
+          Traffic
+          {logTraffic && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
+        </button>
+        <button
           onClick={() => setAddToIdeOpen(true)}
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted/50"
         >
@@ -652,36 +679,73 @@ export function PlaygroundClient({ serverUrl, initialTool, initialArgs, autoRun,
           )}
         </main>
 
-        {/* ── Right: response (only visible for tools tab) ── */}
+        {/* ── Right: response / traffic panel ── */}
         <aside className="border-l border-border/30 overflow-y-auto p-5">
           {activeTab === "tools" ? (
             <>
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Response
-              </h3>
-
-              {executeError && !isRunning && (
-                <div className="p-3 rounded-md bg-red-500/5 border border-red-500/20 mb-4 space-y-2">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
-                    <p className="text-sm text-red-400">{executeError}</p>
-                  </div>
+              {/* Response / Traffic tab selector */}
+              {logTraffic || trafficLog.length > 0 ? (
+                <div className="flex gap-1 mb-4">
                   <button
-                    onClick={() => submitFnRef.current?.()}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted/50"
+                    onClick={() => setResponseTab("response")}
+                    className={`text-xs font-medium px-2.5 py-1 rounded-md transition-colors ${
+                      responseTab === "response"
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
                   >
-                    <RotateCcw className="h-3 w-3" />
-                    Retry
+                    Response
+                  </button>
+                  <button
+                    onClick={() => setResponseTab("traffic")}
+                    className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md transition-colors ${
+                      responseTab === "traffic"
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Traffic
+                    {trafficLog.length > 0 && (
+                      <span className="text-[10px] tabular-nums text-muted-foreground/60">
+                        {trafficLog.length}
+                      </span>
+                    )}
                   </button>
                 </div>
+              ) : (
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">
+                  Response
+                </h3>
               )}
 
-              <ResponseViewer
-                result={lastResult}
-                executionTimeMs={lastExecTime}
-                isLoading={isRunning}
-                warning={lastWarning}
-              />
+              {responseTab === "response" ? (
+                <>
+                  {executeError && !isRunning && (
+                    <div className="p-3 rounded-md bg-red-500/5 border border-red-500/20 mb-4 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                        <p className="text-sm text-red-400">{executeError}</p>
+                      </div>
+                      <button
+                        onClick={() => submitFnRef.current?.()}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted/50"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Retry
+                      </button>
+                    </div>
+                  )}
+
+                  <ResponseViewer
+                    result={lastResult}
+                    executionTimeMs={lastExecTime}
+                    isLoading={isRunning}
+                    warning={lastWarning}
+                  />
+                </>
+              ) : (
+                <TrafficViewer entries={trafficLog} />
+              )}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center text-muted-foreground">

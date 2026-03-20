@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { url, toolName, args, headers } = parsed.data;
+  const logTraffic = (body as Record<string, unknown>).logTraffic === true;
   const isProduction = process.env.NODE_ENV === "production";
   const urlCheck = await validateMcpUrl(url, isProduction ?? false);
   if ("error" in urlCheck) {
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
   // Connect to server
   let connected: Awaited<ReturnType<typeof connectToServer>>;
   try {
-    connected = await connectToServer(url, { headers });
+    connected = await connectToServer(url, { headers, logTraffic });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg === "TIMEOUT") {
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { client } = connected;
+  const { client, trafficLog } = connected;
 
   try {
     const startTime = Date.now();
@@ -119,6 +120,7 @@ export async function POST(req: NextRequest) {
       result: finalResult,
       executionTimeMs,
       ...(warning && { warning }),
+      ...(trafficLog && { traffic: trafficLog }),
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
