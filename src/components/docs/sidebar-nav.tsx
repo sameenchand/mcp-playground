@@ -20,6 +20,12 @@ const sections = [
     ],
   },
   {
+    title: "Tools",
+    links: [
+      { href: "/lint", label: "Schema Linter" },
+    ],
+  },
+  {
     title: "Reference",
     links: [
       { href: "/docs/api", label: "Public API" },

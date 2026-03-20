@@ -8,6 +8,7 @@ import {
   Terminal,
   ArrowRight,
   Braces,
+  Sparkles,
 } from "lucide-react";
 
 export const metadata = {
@@ -59,6 +60,14 @@ const guides = [
     title: "Public API",
     description:
       "REST API for checking server health, inspecting capabilities, and browsing the registry programmatically.",
+    badge: "New",
+  },
+  {
+    href: "/lint",
+    icon: <Sparkles className="h-5 w-5" />,
+    title: "Schema Linter",
+    description:
+      "Grade your MCP server's quality. Check tool descriptions, schema completeness, and estimate token cost.",
     badge: "New",
   },
   {

@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/explore", label: "Explore" },
   { href: "/connect", label: "Connect" },
   { href: "/playground", label: "Playground" },
+  { href: "/lint", label: "Lint" },
   { href: "/docs", label: "Docs" },
   { href: "/about", label: "About" },
 ];
