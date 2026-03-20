@@ -23,6 +23,7 @@ const sections = [
     title: "Tools",
     links: [
       { href: "/lint", label: "Schema Linter" },
+      { href: "/quality", label: "Quality Dashboard" },
     ],
   },
   {

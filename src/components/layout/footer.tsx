@@ -59,6 +59,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/quality"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Quality Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/docs"
                   className="hover:text-foreground transition-colors"
                 >
