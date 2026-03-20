@@ -34,8 +34,9 @@ MCP Playground solves a specific problem: there's no easy way to test MCP server
 - **Form validation** — Required fields validated with inline errors before submission
 - **Actionable errors** — Raw error codes mapped to plain-English troubleshooting messages
 - **Schema Linter** — Grade your MCP server's quality with a letter score (A–F). Checks tool descriptions, JSON Schema completeness, and estimates token cost. Available at `/lint` and via API
+- **Quality Dashboard** — Registry-wide quality leaderboard at `/quality`. Scans every live MCP server, grades them A–F, and displays a sortable, filterable table with grade distribution charts and CSV export. Results are cached locally for 24 hours
 - **Public API** — Free, CORS-enabled REST API (`/api/v1/`) for health checks, server inspection, registry search, and schema linting. Use it in CI pipelines or build your own integrations
-- **Full documentation** — Eight guide pages covering getting started, connecting, sandbox, embedding, local servers, schema linter, API reference, and FAQ
+- **Full documentation** — Nine guide pages covering getting started, connecting, sandbox, embedding, local servers, schema linter, quality dashboard, API reference, and FAQ
 
 ## Quick Start
 
@@ -155,6 +156,7 @@ src/
     api/mcp/              # Server-side MCP proxy endpoints
     api/v1/               # Public REST API (health, inspect, registry, lint)
     lint/                 # Schema linter page
+    quality/              # Registry-wide quality dashboard
     playground/           # Remote playground + sandbox routes
     docs/                 # Documentation pages
     server/[id]/          # Server detail pages
@@ -164,6 +166,7 @@ src/
     registry/             # Server cards, search, filters
     inspector/            # Connection and inspection UI
     linter/               # Schema linter report UI
+    quality/              # Quality dashboard components
     docs/                 # Documentation sidebar nav
     layout/               # Header, footer, sidebar
     ui/                   # shadcn/ui primitives
@@ -172,6 +175,7 @@ src/
     mcp-client.ts         # Server-side MCP client wrapper
     mcp-logging-transport.ts  # Transport wrapper for traffic capture
     schema-linter.ts      # Linting engine with scoring and token estimation
+    quality-scanner.ts    # Batch server scanning for quality dashboard
     featured-servers.ts   # Curated server lists
 ```
 

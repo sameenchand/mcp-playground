@@ -16,6 +16,7 @@ import {
   Plug,
   KeyRound,
   Container,
+  BarChart3,
 } from "lucide-react";
 import { fetchServers } from "@/lib/registry-api";
 import { curatedServers } from "@/lib/featured-servers";
@@ -356,6 +357,13 @@ export default async function HomePage() {
                 href: "/lint",
               },
               {
+                icon: <BarChart3 className="h-5 w-5" />,
+                title: "Quality Dashboard",
+                description:
+                  "Registry-wide leaderboard grading every live MCP server A\u2013F. Sortable, filterable, with CSV export.",
+                href: "/quality",
+              },
+              {
                 icon: <Globe className="h-5 w-5" />,
                 title: "Public REST API",
                 description:
@@ -548,7 +556,7 @@ export default async function HomePage() {
             Ready to explore the MCP ecosystem?
           </h2>
           <p className="text-muted-foreground mb-8">
-            Connect your first MCP server, lint its schema, or explore the registry.
+            Connect your first MCP server, check the quality leaderboard, or explore the registry.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
@@ -559,11 +567,11 @@ export default async function HomePage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/lint"
+              href="/quality"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-card text-foreground font-semibold text-sm hover:bg-accent transition-colors"
             >
-              <ShieldCheck className="h-4 w-4" />
-              Lint a Server
+              <BarChart3 className="h-4 w-4" />
+              Quality Dashboard
             </Link>
             <Link
               href="https://github.com/sameenchand/mcp-playground"

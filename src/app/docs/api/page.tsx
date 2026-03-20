@@ -123,6 +123,10 @@ export default function ApiDocsPage() {
             <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded">/registry/servers</code>{" "}
             — 20 requests per minute per IP
           </p>
+          <p>
+            <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded">/lint</code>{" "}
+            — 10 requests per minute per IP
+          </p>
         </div>
         <p className="text-xs text-muted-foreground/60 mt-2">
           Exceeding limits returns <code className="text-xs bg-muted/50 px-1 rounded">429</code> with a{" "}
