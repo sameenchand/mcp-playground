@@ -4,6 +4,7 @@ import {
   checkRateLimit,
   getClientIp,
 } from "@/lib/api-security";
+import { connectToServer } from "@/lib/mcp-client";
 
 const rateLimitMap = new Map<string, number[]>();
 const isProd = process.env.NODE_ENV === "production";
@@ -32,8 +33,31 @@ export async function GET(req: Request) {
     return apiError(urlCheck.error, "INVALID_URL", 400);
   }
 
+  const isWebSocket = url.startsWith("ws://") || url.startsWith("wss://");
   const start = Date.now();
 
+  // WebSocket health: connect via MCP SDK, then close
+  if (isWebSocket) {
+    try {
+      const { client } = await connectToServer(url);
+      await client.close().catch(() => {});
+      return apiResponse({ status: "up", latencyMs: Date.now() - start, url });
+    } catch (err) {
+      const latencyMs = Date.now() - start;
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "UNAUTHORIZED") {
+        return apiResponse({ status: "auth_required" as const, latencyMs, url });
+      }
+      return apiResponse({
+        status: "down" as const,
+        latencyMs,
+        url,
+        error: msg === "TIMEOUT" ? "Connection timed out" : "Could not reach the server",
+      });
+    }
+  }
+
+  // HTTP health: lightweight raw fetch
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8_000);

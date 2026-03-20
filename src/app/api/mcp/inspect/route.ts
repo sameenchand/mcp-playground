@@ -10,8 +10,12 @@ const RequestSchema = z.object({
     .string()
     .url("Must be a valid URL")
     .refine(
-      (val) => val.startsWith("http://") || val.startsWith("https://"),
-      "URL must start with http:// or https://",
+      (val) =>
+        val.startsWith("http://") ||
+        val.startsWith("https://") ||
+        val.startsWith("ws://") ||
+        val.startsWith("wss://"),
+      "URL must start with http://, https://, ws://, or wss://",
     ),
   headers: z.record(z.string(), z.string()).optional().default({}),
 });
