@@ -1,5 +1,22 @@
 import Link from "next/link";
-import { ArrowRight, Link2, Layers, Zap, Github, Star, Badge, ExternalLink } from "lucide-react";
+import {
+  ArrowRight,
+  Link2,
+  Layers,
+  Zap,
+  Github,
+  Star,
+  Badge,
+  ExternalLink,
+  ShieldCheck,
+  Globe,
+  Terminal,
+  FileSearch,
+  Code2,
+  Plug,
+  KeyRound,
+  Container,
+} from "lucide-react";
 import { fetchServers } from "@/lib/registry-api";
 import { curatedServers } from "@/lib/featured-servers";
 import { checkFeaturedHealth } from "@/lib/featured-health";
@@ -26,7 +43,7 @@ function PlaygroundMockup() {
           <div className="h-3 w-3 rounded-full bg-green-500/70" />
           <div className="flex-1 mx-4 h-6 rounded-md bg-background/50 border border-border/30 flex items-center px-3">
             <span className="text-[11px] text-muted-foreground/50 font-mono">
-              mcpplayground.dev/playground?url=https://demo.example.com/mcp
+              mcpplayground.tech/playground?url=https://demo.example.com/mcp
             </span>
           </div>
         </div>
@@ -233,7 +250,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <p className="mt-4 text-xs text-muted-foreground/60">
-            Works with any Streamable HTTP or SSE endpoint.{" "}
+            Works with any Streamable HTTP, SSE, or WebSocket endpoint.{" "}
             <Link href="/explore" className="underline underline-offset-4 hover:text-muted-foreground transition-colors">
               Browse {serverCount}+ servers in the registry →
             </Link>
@@ -249,7 +266,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8">
             {[
               { value: `${serverCount}+`, label: "Servers in Registry" },
-              { value: "2", label: "Transport Protocols" },
+              { value: "3", label: "Transport Protocols" },
               { value: "0", label: "Installation Required" },
               { value: "MIT", label: "Open Source License" },
             ].map(({ value, label }) => (
@@ -276,7 +293,7 @@ export default async function HomePage() {
                 icon: <Link2 className="h-6 w-6" />,
                 title: "Paste a URL",
                 description:
-                  "Enter any remote MCP server endpoint. Supports Streamable HTTP and SSE transports.",
+                  "Enter any remote MCP server endpoint. Supports Streamable HTTP, SSE, and WebSocket transports.",
               },
               {
                 step: "02",
@@ -308,6 +325,105 @@ export default async function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features grid */}
+      <section className="py-20 px-4 border-t border-border/50 bg-muted/10">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-3">
+              Everything you need to test MCP servers
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              A full-featured toolkit for the MCP ecosystem — inspect, lint, execute, and share.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                icon: <Layers className="h-5 w-5" />,
+                title: "Inspect & Execute",
+                description:
+                  "Connect to any remote MCP server. Browse tools, resources, and prompts — then run them live with auto-generated forms.",
+              },
+              {
+                icon: <ShieldCheck className="h-5 w-5" />,
+                title: "Schema Linter",
+                description:
+                  "Grade any MCP server A–F. 15+ lint rules check tool descriptions, JSON Schema completeness, and token cost estimates.",
+                href: "/lint",
+              },
+              {
+                icon: <Globe className="h-5 w-5" />,
+                title: "Public REST API",
+                description:
+                  "Programmatic access to inspect, lint, and health-check MCP servers. CORS-enabled — build on top of it.",
+                href: "/docs/api",
+              },
+              {
+                icon: <Plug className="h-5 w-5" />,
+                title: "3 Transports",
+                description:
+                  "Streamable HTTP, SSE, and WebSocket. Auto-detects the right protocol — or connect via ws:// directly.",
+              },
+              {
+                icon: <Container className="h-5 w-5" />,
+                title: "In-Browser Sandbox",
+                description:
+                  "Run stdio-based npm MCP servers entirely in your browser via WebContainers. No backend required.",
+                href: "/playground/sandbox",
+              },
+              {
+                icon: <Code2 className="h-5 w-5" />,
+                title: "Embed & Share",
+                description:
+                  "Add a \"Try in MCP Playground\" badge to your README. One click from your docs to a live playground.",
+                href: "/docs/embedding",
+              },
+              {
+                icon: <KeyRound className="h-5 w-5" />,
+                title: "Auth Headers",
+                description:
+                  "Bring your own API keys and authorization headers for servers that require authentication.",
+              },
+              {
+                icon: <FileSearch className="h-5 w-5" />,
+                title: "Server Registry",
+                description:
+                  `Browse ${serverCount}+ servers from the official MCP registry. Search, filter, and jump straight to the playground.`,
+                href: "/explore",
+              },
+            ].map(({ icon, title, description, href }) => {
+              const content = (
+                <>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
+                      {icon}
+                    </div>
+                    <h3 className="font-semibold text-sm text-foreground">{title}</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+                </>
+              );
+              return href ? (
+                <Link
+                  key={title}
+                  href={href}
+                  className="rounded-xl border border-border/50 bg-card p-5 hover:border-primary/40 hover:bg-muted/20 transition-all"
+                >
+                  {content}
+                </Link>
+              ) : (
+                <div
+                  key={title}
+                  className="rounded-xl border border-border/50 bg-card p-5"
+                >
+                  {content}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -371,7 +487,7 @@ export default async function HomePage() {
               href="/explore"
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Browse all {100}+ servers in the registry
+              Browse all {serverCount}+ servers in the registry
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -413,10 +529,10 @@ export default async function HomePage() {
                   <span className="text-blue-300/80">Try in MCP Playground</span>
                   <span className="text-green-400/80">]</span>
                   <span className="text-muted-foreground/60">(</span>
-                  <span className="text-yellow-300/70">https://mcpplayground.dev/badge.svg</span>
+                  <span className="text-yellow-300/70">https://mcpplayground.tech/badge.svg</span>
                   <span className="text-muted-foreground/60">)]</span>
                   <span className="text-muted-foreground/60">(</span>
-                  <span className="text-yellow-300/70">https://mcpplayground.dev/playground?url=YOUR_SERVER_URL</span>
+                  <span className="text-yellow-300/70">https://mcpplayground.tech/playground?url=YOUR_SERVER_URL</span>
                   <span className="text-muted-foreground/60">)</span>
                 </div>
               </div>
@@ -432,7 +548,7 @@ export default async function HomePage() {
             Ready to explore the MCP ecosystem?
           </h2>
           <p className="text-muted-foreground mb-8">
-            Connect your first MCP server and start inspecting tools in seconds.
+            Connect your first MCP server, lint its schema, or explore the registry.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
@@ -441,6 +557,13 @@ export default async function HomePage() {
             >
               Connect a Server
               <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/lint"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-card text-foreground font-semibold text-sm hover:bg-accent transition-colors"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              Lint a Server
             </Link>
             <Link
               href="https://github.com/sameenchand/mcp-playground"
