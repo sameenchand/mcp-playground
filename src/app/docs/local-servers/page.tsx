@@ -46,7 +46,7 @@ export default function LocalServersGuide() {
           Why can&apos;t I connect directly?
         </h2>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          MCP Playground connects to remote servers over HTTP (Streamable HTTP or SSE transport).
+          MCP Playground connects to remote servers over HTTP or WebSocket (Streamable HTTP, SSE, or WebSocket transport).
           Stdio-based servers communicate through standard input/output and need a local process
           to bridge them to HTTP. This is by design — running arbitrary processes in the browser
           would be a security risk.

@@ -69,7 +69,7 @@ export default function GettingStartedPage() {
             {
               step: "02",
               title: "Connect to any remote server",
-              body: "Paste a Streamable HTTP or SSE endpoint URL on the /connect page. MCP Playground connects server-side and returns all available tools, resources, and prompts.",
+              body: "Paste a Streamable HTTP, SSE, or WebSocket endpoint URL on the /connect page. MCP Playground connects server-side and returns all available tools, resources, and prompts.",
             },
             {
               step: "03",
