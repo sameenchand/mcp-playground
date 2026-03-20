@@ -1,10 +1,12 @@
 # MCP Playground
 
-**The interactive testing tool for MCP servers. Like Swagger UI for the Model Context Protocol.**
+**The interactive testing tool for MCP servers. Like Postman for the Model Context Protocol.**
 
-Browse the official registry, connect to any remote server, inspect its tools and resources, execute them live — or run any npm MCP package directly in your browser with zero installation.
+[![Open in MCP Playground](https://mcpplayground.tech/badge.svg)](https://mcpplayground.tech)
 
-[Live Demo](https://mcpplayground.tech) | [MCP Protocol](https://modelcontextprotocol.io)
+Browse the official registry, connect to any remote server, inspect its tools, resources, and prompts, execute them live — or run any npm MCP package directly in your browser with zero installation.
+
+[Live at mcpplayground.tech](https://mcpplayground.tech) | [Documentation](https://mcpplayground.tech/docs) | [MCP Protocol](https://modelcontextprotocol.io)
 
 ---
 
@@ -21,11 +23,17 @@ MCP Playground solves a specific problem: there's no easy way to test MCP server
 - **Registry browser** — Explore servers from the official MCP Registry with metadata, package info, and direct links to test
 - **Server inspector** — Connect to any remote MCP server and see its tools, resources, and prompts with full schema definitions
 - **Tool execution** — Auto-generated forms from JSON Schema supporting all types: strings, numbers, booleans, enums, nested objects, arrays with dynamic add/remove
+- **Resources & Prompts** — Browse server resources with inline content reading, and inspect prompts with argument forms and rendered message previews
+- **Traffic Inspector** — See every JSON-RPC message between client and server in real time. Debug protocol-level issues visually
 - **In-browser sandbox** — Run any npm-based MCP server directly in the browser via WebContainers. No install, no backend, no security risk
-- **Session history** — Track and replay previous tool executions within a session
-- **Shareable URLs** — Deep-link to a specific server, tool, and pre-filled arguments
+- **Persistent history** — Execution history saved to localStorage per server. Survives page reloads
+- **Shareable execution links** — Deep-link to a specific server, tool, and pre-filled arguments. Add `autorun=1` to auto-execute on open
 - **Embed support** — Embed a live playground on your docs site via iframe, or add a "Try in Playground" badge to your README
+- **Add to IDE** — One-click config generation for Claude Desktop, Cursor/Windsurf, and Claude Code CLI
 - **Auth header support** — Pass custom headers for servers requiring authentication (stored in sessionStorage only, never sent to our backend)
+- **Form validation** — Required fields validated with inline errors before submission
+- **Actionable errors** — Raw error codes mapped to plain-English troubleshooting messages
+- **Full documentation** — Six guide pages covering getting started, connecting, sandbox, embedding, local servers, and FAQ
 
 ## Quick Start
 
@@ -88,18 +96,26 @@ Remote connections happen server-side only — the browser never talks to MCP se
 Add a badge to your README so users can test your server instantly:
 
 ```markdown
-[![Try in MCP Playground](https://mcpplayground.dev/badge.svg)](https://mcpplayground.dev/playground?url=YOUR_SERVER_URL)
+[![Open in MCP Playground](https://mcpplayground.tech/badge.svg)](https://mcpplayground.tech/playground?url=YOUR_SERVER_URL)
 ```
 
 Embed a live demo in your documentation:
 
 ```html
 <iframe
-  src="https://mcpplayground.dev/embed?url=YOUR_SERVER_URL&tool=your_tool"
+  src="https://mcpplayground.tech/embed?url=YOUR_SERVER_URL"
   width="100%"
   height="600"
-  frameborder="0"
+  style="border: none; border-radius: 12px;"
+  allow="clipboard-write"
+  title="MCP Playground"
 ></iframe>
+```
+
+Share a reproducible execution link:
+
+```
+https://mcpplayground.tech/playground?url=SERVER_URL&tool=TOOL_NAME&args=BASE64_JSON&autorun=1
 ```
 
 ## Project Structure
@@ -109,17 +125,20 @@ src/
   app/                    # Next.js App Router pages and API routes
     api/mcp/              # Server-side MCP proxy endpoints
     playground/           # Remote playground + sandbox routes
+    docs/                 # Documentation pages
     server/[id]/          # Server detail pages
     explore/              # Registry browser
   components/
-    playground/           # Tool forms, response viewer, history
+    playground/           # Tool forms, response viewer, history, traffic inspector
     registry/             # Server cards, search, filters
     inspector/            # Connection and inspection UI
+    docs/                 # Documentation sidebar nav
     layout/               # Header, footer, sidebar
     ui/                   # shadcn/ui primitives
   lib/
     webcontainer/         # WebContainer manager, transport, React hook
     mcp-client.ts         # Server-side MCP client wrapper
+    mcp-logging-transport.ts  # Transport wrapper for traffic capture
     featured-servers.ts   # Curated server lists
 ```
 
