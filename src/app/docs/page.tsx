@@ -77,7 +77,7 @@ export default function DocsIndexPage() {
         <h1 className="text-3xl font-bold text-foreground mb-3">
           Documentation
         </h1>
-        <p className="text-muted-foreground max-w-2xl leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           MCP Playground is the fastest way to discover, inspect, and test MCP
           servers — directly in your browser. Use these guides to get the most
           out of it.

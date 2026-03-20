@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Terminal, ExternalLink } from "lucide-react";
+import { Terminal, ExternalLink } from "lucide-react";
 import { buttonVariants } from "@/lib/button-variants";
 import { CopyButton } from "@/components/ui/copy-button";
 
@@ -26,22 +26,19 @@ function CodeBlock({ label, command }: { label: string; command: string }) {
 
 export default function LocalServersGuide() {
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
-      <Link
-        href="/explore"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Explore
-      </Link>
-
-      <h1 className="text-3xl font-bold text-foreground mb-2">
-        Using Local MCP Servers
-      </h1>
-      <p className="text-muted-foreground mb-8 max-w-2xl">
-        Most MCP servers in the registry are stdio-based packages meant for local use.
-        Here&apos;s how to expose them over HTTP so you can test them in MCP Playground.
-      </p>
+    <article className="max-w-none">
+      <div className="mb-8">
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+          Features
+        </p>
+        <h1 className="text-3xl font-bold text-foreground mb-3">
+          Local Servers
+        </h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Most MCP servers in the registry are stdio-based packages meant for local use.
+          Here&apos;s how to expose them over HTTP so you can test them in MCP Playground.
+        </p>
+      </div>
 
       {/* Why local servers don't work directly */}
       <section className="mb-10">
@@ -166,6 +163,6 @@ export default function LocalServersGuide() {
           MCP Docs
         </a>
       </div>
-    </div>
+    </article>
   );
 }

@@ -83,7 +83,7 @@ export default function FaqPage() {
         <h1 className="text-3xl font-bold text-foreground mb-3">
           Frequently Asked Questions
         </h1>
-        <p className="text-muted-foreground leading-relaxed max-w-2xl">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           Common questions about MCP Playground and the Model Context Protocol.
         </p>
       </div>

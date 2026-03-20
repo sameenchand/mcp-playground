@@ -38,7 +38,7 @@ export default function EmbeddingPage() {
         <h1 className="text-3xl font-bold text-foreground mb-3">
           Embedding &amp; Sharing
         </h1>
-        <p className="text-muted-foreground leading-relaxed max-w-2xl">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           Embed a live playground in your documentation, share reproducible
           execution links with colleagues, and add a README badge so developers
           can test your server with one click.

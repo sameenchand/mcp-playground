@@ -39,7 +39,7 @@ export default function ConnectingServersPage() {
         <h1 className="text-3xl font-bold text-foreground mb-3">
           Connecting Servers
         </h1>
-        <p className="text-muted-foreground leading-relaxed max-w-2xl">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           MCP Playground connects to any MCP server that exposes a remote HTTP
           endpoint — either Streamable HTTP or SSE transport.
         </p>

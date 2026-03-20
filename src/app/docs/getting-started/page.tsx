@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function GettingStartedPage() {
   return (
-    <article className="prose-sm max-w-none">
+    <article className="max-w-none">
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
           Getting Started
@@ -18,7 +18,7 @@ export default function GettingStartedPage() {
         <h1 className="text-3xl font-bold text-foreground mb-3">
           Introduction
         </h1>
-        <p className="text-muted-foreground leading-relaxed max-w-2xl">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           MCP Playground is an open-source web app for discovering, inspecting,
           and interactively testing MCP servers — directly in your browser,
           with no local setup required.

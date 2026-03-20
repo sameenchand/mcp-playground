@@ -31,7 +31,7 @@ export default function SandboxPage() {
         <h1 className="text-3xl font-bold text-foreground mb-3">
           In-Browser Sandbox
         </h1>
-        <p className="text-muted-foreground leading-relaxed max-w-2xl">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           The Sandbox lets you run any stdio-based npm MCP server entirely
           in your browser — no local Node.js, no terminal, no setup.
         </p>
