@@ -223,8 +223,9 @@ export default function EmbeddingPage() {
 
         <div className="mt-4 p-4 rounded-lg border border-border/40 bg-muted/10">
           <p className="text-xs text-muted-foreground mb-3">Preview:</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`${BASE}/badge.svg`}
+            src="/badge.svg"
             alt="Open in MCP Playground badge preview"
             className="h-6"
           />
