@@ -10,6 +10,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { LoggingTransport, type TrafficEntry } from "@/lib/mcp-logging-transport";
 
 export interface ToolSchema {
   name: string;
@@ -55,18 +56,22 @@ export interface ConnectedClient {
   client: Client;
   transport: "streamable-http" | "sse" | "stdio";
   connectionTimeMs: number;
+  /** Captured traffic log (only present when logTraffic was true). */
+  trafficLog?: TrafficEntry[];
 }
 
 export interface ConnectionOptions {
   /** Custom HTTP headers to send with every MCP request (e.g. auth tokens). */
   headers?: Record<string, string>;
+  /** When true, wrap the transport to capture all JSON-RPC messages. */
+  logTraffic?: boolean;
 }
 
 const CONNECTION_TIMEOUT_MS = 10_000;
 
 async function connectWithTimeout(
   client: Client,
-  transport: StreamableHTTPClientTransport | SSEClientTransport,
+  transport: StreamableHTTPClientTransport | SSEClientTransport | LoggingTransport,
 ): Promise<void> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CONNECTION_TIMEOUT_MS);
@@ -117,12 +122,15 @@ export async function connectToServer(
 
   let client = new Client({ name: "mcp-playground", version: "1.0.0" });
   let usedTransport: "streamable-http" | "sse" = "streamable-http";
+  let logger: LoggingTransport | undefined;
 
   try {
-    const transport = new StreamableHTTPClientTransport(
+    const rawTransport = new StreamableHTTPClientTransport(
       serverUrl,
       requestInit ? { requestInit } : undefined,
     );
+    const transport = options.logTraffic ? new LoggingTransport(rawTransport) : rawTransport;
+    if (transport instanceof LoggingTransport) logger = transport;
     await connectWithTimeout(client, transport);
     usedTransport = "streamable-http";
   } catch (err) {
@@ -133,12 +141,15 @@ export async function connectToServer(
     // Fall back to SSE
     await client.close().catch(() => {});
     client = new Client({ name: "mcp-playground", version: "1.0.0" });
+    logger = undefined;
 
     try {
-      const sseTransport = new SSEClientTransport(
+      const rawSseTransport = new SSEClientTransport(
         serverUrl,
         requestInit ? { requestInit } : undefined,
       );
+      const sseTransport = options.logTraffic ? new LoggingTransport(rawSseTransport) : rawSseTransport;
+      if (sseTransport instanceof LoggingTransport) logger = sseTransport;
       await connectWithTimeout(client, sseTransport);
       usedTransport = "sse";
     } catch (sseErr) {
@@ -149,7 +160,12 @@ export async function connectToServer(
     }
   }
 
-  return { client, transport: usedTransport, connectionTimeMs: Date.now() - startTime };
+  return {
+    client,
+    transport: usedTransport,
+    connectionTimeMs: Date.now() - startTime,
+    ...(logger && { trafficLog: logger.log }),
+  };
 }
 
 /**

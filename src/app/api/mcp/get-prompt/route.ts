@@ -5,12 +5,11 @@ import { checkRateLimit, validateMcpUrl, getClientIp } from "@/lib/api-security"
 
 const rateLimitMap = new Map<string, number[]>();
 const EXECUTION_TIMEOUT_MS = 30_000;
-const MAX_RESPONSE_BYTES = 1_000_000;
 
 const RequestSchema = z.object({
   url: z.string().url(),
-  toolName: z.string().min(1, "toolName is required"),
-  args: z.record(z.string(), z.unknown()).default({}),
+  promptName: z.string().min(1, "promptName is required"),
+  args: z.record(z.string(), z.string()).default({}),
   headers: z.record(z.string(), z.string()).optional().default({}),
 });
 
@@ -42,8 +41,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { url, toolName, args, headers } = parsed.data;
-  const logTraffic = (body as Record<string, unknown>).logTraffic === true;
+  const { url, promptName, args, headers } = parsed.data;
   const isProduction = process.env.NODE_ENV === "production";
   const urlCheck = await validateMcpUrl(url, isProduction ?? false);
   if ("error" in urlCheck) {
@@ -53,10 +51,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Connect to server
   let connected: Awaited<ReturnType<typeof connectToServer>>;
   try {
-    connected = await connectToServer(url, { headers, logTraffic });
+    connected = await connectToServer(url, { headers });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg === "TIMEOUT") {
@@ -67,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
     if (msg === "UNAUTHORIZED") {
       return NextResponse.json(
-        { success: false, error: "This server requires authentication. Check its docs for the required API key or token.", code: "UNAUTHORIZED" },
+        { success: false, error: "This server requires authentication.", code: "UNAUTHORIZED" },
         { status: 401 },
       );
     }
@@ -77,13 +74,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { client, trafficLog } = connected;
+  const { client } = connected;
 
   try {
     const startTime = Date.now();
 
     const result = await Promise.race([
-      client.callTool({ name: toolName, arguments: args }),
+      client.getPrompt({ name: promptName, arguments: args }),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("EXECUTION_TIMEOUT")), EXECUTION_TIMEOUT_MS),
       ),
@@ -91,48 +88,25 @@ export async function POST(req: NextRequest) {
 
     const executionTimeMs = Date.now() - startTime;
 
-    // Check response size and truncate if needed
-    const resultStr = JSON.stringify(result);
-    let warning: string | undefined;
-    let finalResult = result;
-
-    if (resultStr.length > MAX_RESPONSE_BYTES) {
-      warning = "Response was truncated at 1MB.";
-      // Truncate text content to fit
-      const truncated = { ...result } as typeof result;
-      if (Array.isArray(truncated.content)) {
-        truncated.content = truncated.content.map((block) => {
-          if (block.type === "text") {
-            const maxChars = 50_000;
-            return {
-              ...block,
-              text: block.text.slice(0, maxChars) + (block.text.length > maxChars ? "\n\n[... truncated ...]" : ""),
-            };
-          }
-          return block;
-        });
-      }
-      finalResult = truncated;
-    }
-
     return NextResponse.json({
       success: true,
-      result: finalResult,
+      result: {
+        description: result.description,
+        messages: result.messages,
+      },
       executionTimeMs,
-      ...(warning && { warning }),
-      ...(trafficLog && { traffic: trafficLog }),
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg === "EXECUTION_TIMEOUT") {
       return NextResponse.json(
-        { success: false, error: "Tool execution timed out after 30 seconds.", code: "TIMEOUT" },
+        { success: false, error: "Prompt expansion timed out after 30 seconds.", code: "TIMEOUT" },
         { status: 408 },
       );
     }
-    console.error("[mcp/execute] Error:", msg);
+    console.error("[mcp/get-prompt] Error:", msg);
     return NextResponse.json(
-      { success: false, error: "Tool execution failed. The server may have returned an error.", code: "EXECUTION_ERROR" },
+      { success: false, error: "Failed to get prompt. The server may have returned an error.", code: "EXECUTION_ERROR" },
       { status: 500 },
     );
   } finally {
