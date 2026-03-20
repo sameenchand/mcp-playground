@@ -73,7 +73,7 @@ describe("checkRateLimit", () => {
 });
 
 describe("validateMcpUrl", () => {
-  it("rejects non-http URLs", async () => {
+  it("rejects non-http/ws URLs", async () => {
     const result = await validateMcpUrl("ftp://example.com", false);
     expect("error" in result).toBe(true);
   });
@@ -94,5 +94,21 @@ describe("validateMcpUrl", () => {
   it("accepts valid https URLs", async () => {
     const result = await validateMcpUrl("https://mcp.deepwiki.com/mcp", false);
     expect("hostname" in result).toBe(true);
+  });
+
+  it("accepts ws:// URLs", async () => {
+    const result = await validateMcpUrl("ws://example.com/mcp", false);
+    expect("hostname" in result).toBe(true);
+    if ("hostname" in result) {
+      expect(result.hostname).toBe("example.com");
+    }
+  });
+
+  it("accepts wss:// URLs", async () => {
+    const result = await validateMcpUrl("wss://example.com/mcp", false);
+    expect("hostname" in result).toBe(true);
+    if ("hostname" in result) {
+      expect(result.hostname).toBe("example.com");
+    }
   });
 });

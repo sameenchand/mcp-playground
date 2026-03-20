@@ -111,18 +111,35 @@ export function checkRateLimit(
  * In production, resolves the hostname and blocks private IPs.
  * In development, only blocks obvious private hostnames (for local testing).
  */
+/** Protocols accepted for MCP server URLs. */
+const ALLOWED_PROTOCOLS = ["http:", "https:", "ws:", "wss:"];
+
 export async function validateMcpUrl(
   url: string,
   blockPrivate: boolean,
 ): Promise<{ error: string } | { hostname: string }> {
-  if (!url.startsWith("http://") && !url.startsWith("https://")) {
-    return { error: "URL must start with http:// or https://" };
-  }
+  // Normalise ws(s):// to http(s):// for URL parsing (same host, different scheme)
+  const normalisedUrl = url
+    .replace(/^ws:\/\//, "http://")
+    .replace(/^wss:\/\//, "https://");
+
   let parsed: URL;
   try {
-    parsed = new URL(url);
+    parsed = new URL(normalisedUrl);
   } catch {
     return { error: "That doesn't look like a valid URL." };
+  }
+
+  // Check the *original* URL scheme (before normalisation)
+  let originalProtocol: string;
+  try {
+    originalProtocol = new URL(url).protocol;
+  } catch {
+    return { error: "That doesn't look like a valid URL." };
+  }
+
+  if (!ALLOWED_PROTOCOLS.includes(originalProtocol)) {
+    return { error: "URL must start with http://, https://, ws://, or wss://" };
   }
 
   if (blockPrivate) {
