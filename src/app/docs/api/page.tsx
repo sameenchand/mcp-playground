@@ -90,10 +90,10 @@ export default function ApiDocsPage() {
         <h1 className="text-3xl font-bold text-foreground mb-3">
           Public API
         </h1>
-        <p className="text-muted-foreground leading-relaxed max-w-2xl">
-          MCP Playground exposes a free, CORS-enabled REST API. Use it to check
-          server health in CI, list available tools programmatically, or build
-          your own integrations on top of the MCP registry.
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+          MCP Playground exposes a free, CORS-enabled REST API. Use it to
+          check server health in CI, list available tools programmatically,
+          or build your own integrations on top of the MCP registry.
         </p>
       </div>
 
