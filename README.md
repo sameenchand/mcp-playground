@@ -14,14 +14,14 @@ Browse the official registry, connect to any remote server, inspect its tools, r
 
 MCP Playground solves a specific problem: there's no easy way to test MCP servers. You either wire up Claude Desktop, use the CLI inspector, or write throwaway scripts. This gives you a web UI where you paste a URL and start testing in seconds.
 
-**Remote servers** — Connect to any MCP server over Streamable HTTP or SSE. The playground auto-generates forms from JSON Schema, executes tool calls, and displays structured results.
+**Remote servers** — Connect to any MCP server over Streamable HTTP, SSE, or WebSocket (`ws://` / `wss://`). The playground auto-generates forms from JSON Schema, executes tool calls, and displays structured results.
 
 **In-browser sandbox** — Most MCP servers in the registry are npm packages with no remote endpoint. The sandbox boots a full Node.js runtime in your browser using WebContainers (WASM), installs the package, and connects via stdio. Everything runs locally. Nothing is sent to our servers.
 
 ## Features
 
 - **Registry browser** — Explore servers from the official MCP Registry with metadata, package info, and direct links to test
-- **Server inspector** — Connect to any remote MCP server and see its tools, resources, and prompts with full schema definitions
+- **Server inspector** — Connect to any remote MCP server (HTTP, SSE, or WebSocket) and see its tools, resources, and prompts with full schema definitions
 - **Tool execution** — Auto-generated forms from JSON Schema supporting all types: strings, numbers, booleans, enums, nested objects, arrays with dynamic add/remove
 - **Resources & Prompts** — Browse server resources with inline content reading, and inspect prompts with argument forms and rendered message previews
 - **Traffic Inspector** — See every JSON-RPC message between client and server in real time. Debug protocol-level issues visually
@@ -62,7 +62,7 @@ Connect to `http://localhost:3001/mcp` in the playground. Exposes 4 tools, 2 res
 Two distinct data paths, depending on the server type:
 
 ```
-Remote servers (HTTP/SSE):
+Remote servers (HTTP/SSE/WebSocket):
   Browser --> Next.js API Route --> MCP SDK Client --> Remote MCP Server
   Browser <-- JSON Response    <-- API Route       <-- Server Response
 
