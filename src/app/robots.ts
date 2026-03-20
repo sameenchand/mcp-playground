@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/"],
       },
     ],
-    sitemap: "https://mcpplayground.dev/sitemap.xml",
+    sitemap: "https://mcpplayground.tech/sitemap.xml",
   };
 }
