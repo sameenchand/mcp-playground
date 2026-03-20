@@ -10,6 +10,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { WebSocketClientTransport } from "@modelcontextprotocol/sdk/client/websocket.js";
 import { LoggingTransport, type TrafficEntry } from "@/lib/mcp-logging-transport";
 
 export interface ToolSchema {
@@ -48,13 +49,13 @@ export interface InspectResult {
   tools: ToolSchema[];
   resources: ResourceInfo[];
   prompts: PromptInfo[];
-  transport: "streamable-http" | "sse" | "stdio";
+  transport: "streamable-http" | "sse" | "websocket" | "stdio";
   connectionTimeMs: number;
 }
 
 export interface ConnectedClient {
   client: Client;
-  transport: "streamable-http" | "sse" | "stdio";
+  transport: "streamable-http" | "sse" | "websocket" | "stdio";
   connectionTimeMs: number;
   /** Captured traffic log (only present when logTraffic was true). */
   trafficLog?: TrafficEntry[];
@@ -71,7 +72,7 @@ const CONNECTION_TIMEOUT_MS = 10_000;
 
 async function connectWithTimeout(
   client: Client,
-  transport: StreamableHTTPClientTransport | SSEClientTransport | LoggingTransport,
+  transport: StreamableHTTPClientTransport | SSEClientTransport | WebSocketClientTransport | LoggingTransport,
 ): Promise<void> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CONNECTION_TIMEOUT_MS);
@@ -115,15 +116,40 @@ export async function connectToServer(
 ): Promise<ConnectedClient> {
   const startTime = Date.now();
   const serverUrl = new URL(url);
+  const isWebSocket = url.startsWith("ws://") || url.startsWith("wss://");
   const requestInit: RequestInit | undefined =
     options.headers && Object.keys(options.headers).length > 0
       ? { headers: options.headers }
       : undefined;
 
   let client = new Client({ name: "mcp-playground", version: "1.0.0" });
-  let usedTransport: "streamable-http" | "sse" = "streamable-http";
+  let usedTransport: "streamable-http" | "sse" | "websocket" = "streamable-http";
   let logger: LoggingTransport | undefined;
 
+  // ── WebSocket transport (no fallback needed) ──────────────────────
+  if (isWebSocket) {
+    try {
+      const rawWsTransport = new WebSocketClientTransport(serverUrl);
+      const wsTransport = options.logTraffic ? new LoggingTransport(rawWsTransport) : rawWsTransport;
+      if (wsTransport instanceof LoggingTransport) logger = wsTransport;
+      await connectWithTimeout(client, wsTransport);
+      usedTransport = "websocket";
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg === "CONNECTION_TIMEOUT") throw new Error("TIMEOUT");
+      if (isAuthError(msg)) throw new Error("UNAUTHORIZED");
+      throw new Error("CONNECTION_FAILED");
+    }
+
+    return {
+      client,
+      transport: usedTransport,
+      connectionTimeMs: Date.now() - startTime,
+      ...(logger && { trafficLog: logger.log }),
+    };
+  }
+
+  // ── HTTP transport: Streamable HTTP → SSE fallback ────────────────
   try {
     const rawTransport = new StreamableHTTPClientTransport(
       serverUrl,

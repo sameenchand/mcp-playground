@@ -154,8 +154,8 @@ Browser ← JSON Response ←  API Route ← MCP Server Response`}
             },
             {
               name: "WebSocket",
-              status: "roadmap",
-              note: "Not yet supported.",
+              status: "supported",
+              note: "Use ws:// or wss:// URLs.",
             },
           ].map((item) => (
             <div

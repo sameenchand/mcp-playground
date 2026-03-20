@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateMcpUrl } from "@/lib/api-security";
+import { connectToServer } from "@/lib/mcp-client";
 
 export type HealthStatus = "up" | "auth_required" | "down" | "unknown";
 
@@ -10,6 +11,24 @@ export interface HealthResult {
 }
 
 const TIMEOUT_MS = 8_000;
+
+/**
+ * Health check for WebSocket URLs — connects via MCP SDK and immediately closes.
+ */
+async function checkWebSocketHealth(url: string): Promise<HealthResult> {
+  const start = Date.now();
+  try {
+    const { client } = await connectToServer(url);
+    await client.close().catch(() => {});
+    return { status: "up", latencyMs: Date.now() - start };
+  } catch (err) {
+    const latencyMs = Date.now() - start;
+    const msg = err instanceof Error ? err.message : "";
+    if (msg === "TIMEOUT") return { status: "down", latencyMs };
+    if (msg === "UNAUTHORIZED") return { status: "auth_required", latencyMs };
+    return { status: "down", latencyMs };
+  }
+}
 
 export async function GET(req: NextRequest) {
   const url = req.nextUrl.searchParams.get("url");
@@ -25,6 +44,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: urlCheck.error }, { status: 400 });
   }
 
+  // WebSocket health: connect via SDK, then close
+  if (url.startsWith("ws://") || url.startsWith("wss://")) {
+    return NextResponse.json(await checkWebSocketHealth(url));
+  }
+
+  // HTTP health: lightweight raw fetch
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   const start = Date.now();
