@@ -33,7 +33,8 @@ MCP Playground solves a specific problem: there's no easy way to test MCP server
 - **Auth header support** — Pass custom headers for servers requiring authentication (stored in sessionStorage only, never sent to our backend)
 - **Form validation** — Required fields validated with inline errors before submission
 - **Actionable errors** — Raw error codes mapped to plain-English troubleshooting messages
-- **Full documentation** — Six guide pages covering getting started, connecting, sandbox, embedding, local servers, and FAQ
+- **Public API** — Free, CORS-enabled REST API (`/api/v1/`) for health checks, server inspection, and registry search. Use it in CI pipelines or build your own integrations
+- **Full documentation** — Seven guide pages covering getting started, connecting, sandbox, embedding, local servers, API reference, and FAQ
 
 ## Quick Start
 
@@ -118,12 +119,36 @@ Share a reproducible execution link:
 https://mcpplayground.tech/playground?url=SERVER_URL&tool=TOOL_NAME&args=BASE64_JSON&autorun=1
 ```
 
+## Public API
+
+MCP Playground exposes a free, CORS-enabled REST API at `https://mcpplayground.tech/api/v1/`:
+
+| Endpoint | Description | Rate Limit |
+|----------|-------------|------------|
+| `GET /api/v1/health?url=` | Ping an MCP server, get status + latency | 30/min |
+| `GET /api/v1/inspect?url=` | Connect and return all tools, resources, prompts | 10/min |
+| `GET /api/v1/registry/servers` | Search and browse the MCP server registry | 20/min |
+
+```bash
+# Check if a server is up
+curl "https://mcpplayground.tech/api/v1/health?url=https://mcp.deepwiki.com/mcp"
+
+# List all tools for a server
+curl "https://mcpplayground.tech/api/v1/inspect?url=https://mcp.deepwiki.com/mcp"
+
+# Search the registry
+curl "https://mcpplayground.tech/api/v1/registry/servers?q=filesystem&limit=5"
+```
+
+Full API documentation: [mcpplayground.tech/docs/api](https://mcpplayground.tech/docs/api)
+
 ## Project Structure
 
 ```
 src/
   app/                    # Next.js App Router pages and API routes
     api/mcp/              # Server-side MCP proxy endpoints
+    api/v1/               # Public REST API (health, inspect, registry)
     playground/           # Remote playground + sandbox routes
     docs/                 # Documentation pages
     server/[id]/          # Server detail pages
