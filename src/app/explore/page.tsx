@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Terminal } from "lucide-react";
 import { fetchServers } from "@/lib/registry-api";
 import { ServerGrid } from "@/components/registry/server-grid";
 import type { Metadata } from "next";
@@ -20,21 +21,26 @@ export default async function ExplorePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Explore MCP Servers</h1>
-        <p className="text-muted-foreground mt-1">
-          {servers.length > 0 ? (
-            <>
-              {servers.length.toLocaleString()} servers loaded from the official MCP registry —{" "}
-              <span className="text-green-500 font-medium">{liveCount} with live remote endpoints</span>
-              {" "}you can test right now.{" "}
-              <Link href="/docs/local-servers" className="text-primary hover:underline underline-offset-4">
-                Want to test a local server?
-              </Link>
-            </>
-          ) : (
-            "Browse servers from the official MCP registry"
-          )}
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Explore MCP Servers</h1>
+            {servers.length > 0 && (
+              <p className="text-muted-foreground mt-1">
+                {servers.length.toLocaleString()} servers from the official registry
+                {" · "}
+                <span className="text-green-500 font-medium">{liveCount} with live endpoints</span>
+                {" "}you can test right now.
+              </p>
+            )}
+          </div>
+          <Link
+            href="/docs/local-servers"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border/50 bg-muted/30 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0 w-fit"
+          >
+            <Terminal className="h-3.5 w-3.5" />
+            Local server? See how →
+          </Link>
+        </div>
       </div>
 
       {servers.length === 0 ? (
