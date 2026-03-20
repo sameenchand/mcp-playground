@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Terminal,
   ArrowRight,
+  Braces,
 } from "lucide-react";
 
 export const metadata = {
@@ -51,6 +52,14 @@ const guides = [
     title: "Local Servers",
     description:
       "Expose a local stdio server over HTTP with supergateway or mcp-proxy so you can test it here.",
+  },
+  {
+    href: "/docs/api",
+    icon: <Braces className="h-5 w-5" />,
+    title: "Public API",
+    description:
+      "REST API for checking server health, inspecting capabilities, and browsing the registry programmatically.",
+    badge: "New",
   },
   {
     href: "/docs/faq",

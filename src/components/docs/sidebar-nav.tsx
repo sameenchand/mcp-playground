@@ -22,6 +22,7 @@ const sections = [
   {
     title: "Reference",
     links: [
+      { href: "/docs/api", label: "Public API" },
       { href: "/docs/faq", label: "FAQ" },
     ],
   },
