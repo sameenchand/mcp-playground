@@ -69,6 +69,10 @@ export default function AboutPage() {
                 desc: "Grade any MCP server A–F with 15+ lint rules. Check tool descriptions, JSON Schema completeness, and token cost estimates.",
               },
               {
+                title: "Quality Dashboard",
+                desc: "Registry-wide leaderboard grading every live MCP server A\u2013F. Sortable table, grade distribution chart, and CSV export.",
+              },
+              {
                 title: "Public REST API",
                 desc: "Programmatic access to inspect, lint, health-check, and browse the registry. CORS-enabled with rate limiting.",
               },

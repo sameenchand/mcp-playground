@@ -55,6 +55,11 @@ const faqs = [
     a: "Yes! You can connect to MCP servers over ws:// or wss:// — just paste the WebSocket URL on the Connect page. MCP Playground uses the official MCP SDK's WebSocketClientTransport under the hood.",
   },
   {
+    q: "What is the Quality Dashboard?",
+    a: "The Quality Dashboard (/quality) scans every live MCP server in the registry and grades them A\u2013F using the same Schema Linter rules. It shows a sortable leaderboard with grade distribution, search, filtering, and CSV export. Scans run progressively in your browser and results are cached locally for 24 hours.",
+    link: { href: "/quality", label: "Quality Dashboard \u2192" },
+  },
+  {
     q: "Can I run Python MCP servers in the Sandbox?",
     a: "Not currently. The In-Browser Sandbox uses WebContainers, which only supports Node.js. Python/pypi servers are not supported in the browser sandbox. To test Python servers, run them locally and expose via HTTP.",
   },

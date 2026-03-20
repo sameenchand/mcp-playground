@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Braces,
   Sparkles,
+  BarChart3,
 } from "lucide-react";
 
 export const metadata = {
@@ -68,6 +69,13 @@ const guides = [
     title: "Schema Linter",
     description:
       "Grade your MCP server's quality. Check tool descriptions, schema completeness, and estimate token cost.",
+  },
+  {
+    href: "/quality",
+    icon: <BarChart3 className="h-5 w-5" />,
+    title: "Quality Dashboard",
+    description:
+      "Registry-wide quality leaderboard. Scan every live MCP server, grade them A\u2013F, and export results as CSV.",
     badge: "New",
   },
   {

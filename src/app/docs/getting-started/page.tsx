@@ -78,6 +78,11 @@ export default function GettingStartedPage() {
             },
             {
               step: "04",
+              title: "Check server quality",
+              body: "Visit the Quality Dashboard (/quality) to see how every live server in the registry scores. Servers are graded A\u2013F on tool descriptions, schema completeness, and metadata quality.",
+            },
+            {
+              step: "05",
               title: "Share what you find",
               body: "Every execution is shareable. Copy a link that auto-connects, selects the tool, pre-fills arguments, and optionally auto-runs — so others can reproduce your exact session.",
             },
