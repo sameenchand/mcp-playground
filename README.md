@@ -33,8 +33,9 @@ MCP Playground solves a specific problem: there's no easy way to test MCP server
 - **Auth header support** — Pass custom headers for servers requiring authentication (stored in sessionStorage only, never sent to our backend)
 - **Form validation** — Required fields validated with inline errors before submission
 - **Actionable errors** — Raw error codes mapped to plain-English troubleshooting messages
-- **Public API** — Free, CORS-enabled REST API (`/api/v1/`) for health checks, server inspection, and registry search. Use it in CI pipelines or build your own integrations
-- **Full documentation** — Seven guide pages covering getting started, connecting, sandbox, embedding, local servers, API reference, and FAQ
+- **Schema Linter** — Grade your MCP server's quality with a letter score (A–F). Checks tool descriptions, JSON Schema completeness, and estimates token cost. Available at `/lint` and via API
+- **Public API** — Free, CORS-enabled REST API (`/api/v1/`) for health checks, server inspection, registry search, and schema linting. Use it in CI pipelines or build your own integrations
+- **Full documentation** — Eight guide pages covering getting started, connecting, sandbox, embedding, local servers, schema linter, API reference, and FAQ
 
 ## Quick Start
 
@@ -128,6 +129,7 @@ MCP Playground exposes a free, CORS-enabled REST API at `https://mcpplayground.t
 | `GET /api/v1/health?url=` | Ping an MCP server, get status + latency | 30/min |
 | `GET /api/v1/inspect?url=` | Connect and return all tools, resources, prompts | 10/min |
 | `GET /api/v1/registry/servers` | Search and browse the MCP server registry | 20/min |
+| `GET /api/v1/lint?url=` | Lint a server — grade, issues, token estimate | 10/min |
 
 ```bash
 # Check if a server is up
@@ -138,6 +140,9 @@ curl "https://mcpplayground.tech/api/v1/inspect?url=https://mcp.deepwiki.com/mcp
 
 # Search the registry
 curl "https://mcpplayground.tech/api/v1/registry/servers?q=filesystem&limit=5"
+
+# Lint a server (grade + token estimate)
+curl "https://mcpplayground.tech/api/v1/lint?url=https://mcp.deepwiki.com/mcp"
 ```
 
 Full API documentation: [mcpplayground.tech/docs/api](https://mcpplayground.tech/docs/api)
@@ -148,7 +153,8 @@ Full API documentation: [mcpplayground.tech/docs/api](https://mcpplayground.tech
 src/
   app/                    # Next.js App Router pages and API routes
     api/mcp/              # Server-side MCP proxy endpoints
-    api/v1/               # Public REST API (health, inspect, registry)
+    api/v1/               # Public REST API (health, inspect, registry, lint)
+    lint/                 # Schema linter page
     playground/           # Remote playground + sandbox routes
     docs/                 # Documentation pages
     server/[id]/          # Server detail pages
@@ -157,6 +163,7 @@ src/
     playground/           # Tool forms, response viewer, history, traffic inspector
     registry/             # Server cards, search, filters
     inspector/            # Connection and inspection UI
+    linter/               # Schema linter report UI
     docs/                 # Documentation sidebar nav
     layout/               # Header, footer, sidebar
     ui/                   # shadcn/ui primitives
@@ -164,6 +171,7 @@ src/
     webcontainer/         # WebContainer manager, transport, React hook
     mcp-client.ts         # Server-side MCP client wrapper
     mcp-logging-transport.ts  # Transport wrapper for traffic capture
+    schema-linter.ts      # Linting engine with scoring and token estimation
     featured-servers.ts   # Curated server lists
 ```
 
