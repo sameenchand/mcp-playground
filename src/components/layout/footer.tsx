@@ -51,6 +51,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/lint"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Schema Linter
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/docs"
                   className="hover:text-foreground transition-colors"
                 >
