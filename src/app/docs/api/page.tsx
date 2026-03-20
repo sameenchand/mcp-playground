@@ -141,7 +141,7 @@ export default function ApiDocsPage() {
         </h4>
         <div className="divide-y divide-border/30 mb-4">
           <Param name="url" type="string" required>
-            The MCP server URL to check.
+            The MCP server URL to check. Supports <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">http(s)://</code> and <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">ws(s)://</code> schemes.
           </Param>
         </div>
 
@@ -201,7 +201,7 @@ export default function ApiDocsPage() {
         </h4>
         <div className="divide-y divide-border/30 mb-4">
           <Param name="url" type="string" required>
-            The MCP server URL to inspect.
+            The MCP server URL to inspect. Supports <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">http(s)://</code> and <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">ws(s)://</code> schemes.
           </Param>
         </div>
 

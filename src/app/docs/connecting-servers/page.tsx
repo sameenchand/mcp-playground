@@ -40,8 +40,8 @@ export default function ConnectingServersPage() {
           Connecting Servers
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          MCP Playground connects to any MCP server that exposes a remote HTTP
-          endpoint — either Streamable HTTP or SSE transport.
+          MCP Playground connects to any MCP server that exposes a remote
+          endpoint — Streamable HTTP, SSE, or WebSocket transport.
         </p>
       </div>
 
@@ -55,7 +55,7 @@ export default function ConnectingServersPage() {
           <Link href="/connect" className="text-primary hover:underline underline-offset-4">
             /connect
           </Link>{" "}
-          and paste your server&apos;s URL. MCP Playground supports two
+          and paste your server&apos;s URL. MCP Playground supports three
           transport types:
         </p>
         <div className="space-y-3 mb-4">
@@ -78,11 +78,21 @@ export default function ConnectingServersPage() {
               Streamable HTTP fails.
             </p>
           </div>
+          <div className="rounded-lg border border-border/40 p-4">
+            <p className="text-xs font-medium text-foreground mb-1">
+              WebSocket
+            </p>
+            <CodeBlock>wss://your-server.com/mcp</CodeBlock>
+            <p className="text-xs text-muted-foreground">
+              For servers that use WebSocket transport. Use <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">ws://</code> or{" "}
+              <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">wss://</code> URLs — connected directly via the MCP SDK.
+            </p>
+          </div>
         </div>
         <p className="text-xs text-muted-foreground bg-muted/10 border border-border/40 rounded-lg px-4 py-3">
-          <strong className="text-foreground font-medium">Note:</strong> You do
-          not need to specify the transport. MCP Playground tries Streamable
-          HTTP first, then falls back to SSE automatically.
+          <strong className="text-foreground font-medium">Note:</strong> For
+          HTTP URLs, MCP Playground tries Streamable HTTP first, then falls
+          back to SSE automatically. For WebSocket URLs (<code className="text-xs bg-muted/50 px-1 py-0.5 rounded">ws://</code> / <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">wss://</code>), it connects directly.
         </p>
       </section>
 

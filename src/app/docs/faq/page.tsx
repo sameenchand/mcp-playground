@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "What MCP transports are supported?",
-    a: "MCP Playground supports Streamable HTTP and SSE (Server-Sent Events) transports. It tries Streamable HTTP first and automatically falls back to SSE. stdio transport is not directly supported — use supergateway or the built-in Sandbox instead.",
+    a: "MCP Playground supports Streamable HTTP, SSE (Server-Sent Events), and WebSocket (ws:// / wss://) transports. For HTTP URLs it tries Streamable HTTP first and automatically falls back to SSE. WebSocket URLs are connected directly. stdio transport is not directly supported — use supergateway or the built-in Sandbox instead.",
   },
   {
     q: "My server isn't in the registry. Can I still use it?",
@@ -52,7 +52,7 @@ const faqs = [
   },
   {
     q: "Does MCP Playground support WebSocket transport?",
-    a: "Not yet. WebSocket transport support is on the roadmap.",
+    a: "Yes! You can connect to MCP servers over ws:// or wss:// — just paste the WebSocket URL on the Connect page. MCP Playground uses the official MCP SDK's WebSocketClientTransport under the hood.",
   },
   {
     q: "Can I run Python MCP servers in the Sandbox?",
