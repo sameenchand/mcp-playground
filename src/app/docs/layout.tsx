@@ -1,16 +1,19 @@
 import { SidebarNav } from "@/components/docs/sidebar-nav";
+import { MobileDocsNav } from "@/components/docs/mobile-docs-nav";
 
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
       <div className="flex gap-10">
-        {/* Sidebar */}
+        {/* Sidebar — desktop only */}
         <aside className="hidden lg:block w-52 shrink-0">
           <SidebarNav />
         </aside>
 
         {/* Content */}
         <main className="flex-1 min-w-0 max-w-3xl">
+          {/* Mobile docs nav — hidden on desktop */}
+          <MobileDocsNav />
           {children}
         </main>
       </div>
