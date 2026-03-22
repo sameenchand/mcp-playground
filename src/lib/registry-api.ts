@@ -89,19 +89,31 @@ function mapServer(raw: RawServerData): MCPServer {
 // --- Public API ---
 
 const MAX_PAGES = 20; // 2000 servers max per cold load; cached for 1 hour via ISR
+const FETCH_TIMEOUT_MS = 8000;  // 8s per page request
+const TOTAL_BUDGET_MS = 40000; // 40s total — stays well under Vercel's 60s build limit
 
 export async function fetchServers(): Promise<MCPServer[]> {
   const allServers: MCPServer[] = [];
   const seen = new Set<string>();
   let cursor: string | undefined;
+  const startTime = Date.now();
 
   for (let page = 0; page < MAX_PAGES; page++) {
+    // Stop fetching if we are approaching the total budget
+    if (Date.now() - startTime > TOTAL_BUDGET_MS) {
+      console.warn(`fetchServers: total budget reached after ${page} pages, returning ${allServers.length} servers`);
+      break;
+    }
+
     try {
       const url = cursor
         ? `${REGISTRY_BASE}/v0.1/servers?limit=100&cursor=${encodeURIComponent(cursor)}`
         : `${REGISTRY_BASE}/v0.1/servers?limit=100`;
 
-      const res = await fetch(url, { next: { revalidate: 3600 } });
+      const res = await fetch(url, {
+        next: { revalidate: 3600 },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      });
       if (!res.ok) throw new Error(`Registry API error: ${res.status}`);
 
       const data: V01ListResponse = await res.json();

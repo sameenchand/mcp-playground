@@ -2,7 +2,7 @@ import { fetchServers } from "@/lib/registry-api";
 import { QualityDashboard } from "@/components/quality/quality-dashboard";
 import type { Metadata } from "next";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "MCP Server Quality Dashboard",
