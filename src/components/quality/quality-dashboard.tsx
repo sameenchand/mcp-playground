@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Play, Pause, RotateCcw, Download, Loader2 } from "lucide-react";
+import { Play, Pause, RotateCcw, Download, Loader2, RefreshCw } from "lucide-react";
 import { GradeDistribution } from "@/components/quality/grade-distribution";
 import { QualityTable } from "@/components/quality/quality-table";
 import type { ScanResult } from "@/lib/quality-scanner";
@@ -102,6 +102,7 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
   const [scanning, setScanning] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [gradeFilter, setGradeFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "reachable" | "auth-required" | "failed">("all");
   const abortRef = useRef(false);
   const scanIndexRef = useRef(0);
 
@@ -216,6 +217,10 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
 
   const successResults = results.filter((r) => !r.error);
   const failedResults = results.filter((r) => r.error);
+  const authRequiredCount = failedResults.filter((r) =>
+    r.error?.toLowerCase().includes("auth"),
+  ).length;
+  const unreachableCount = failedResults.length - authRequiredCount;
   const avgScore =
     successResults.length > 0
       ? Math.round(
@@ -242,6 +247,15 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
           >
             <Play className="h-4 w-4" />
             {scannedCount > 0 ? "Resume Scan" : "Start Scan"}
+          </button>
+        )}
+        {!scanning && isComplete && (
+          <button
+            onClick={resetScan}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Re-scan All
           </button>
         )}
         {scanning && (
@@ -315,7 +329,7 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
           <StatCard
             label="Reachable"
             value={successResults.length.toString()}
-            sub={`${failedResults.length} failed`}
+            sub={`${authRequiredCount} auth · ${unreachableCount} unreachable`}
           />
           <StatCard
             label="Top Grade"
@@ -339,7 +353,12 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
 
       {/* Results table */}
       {results.length > 0 && (
-        <QualityTable results={results} gradeFilter={gradeFilter} />
+        <QualityTable
+          results={results}
+          gradeFilter={gradeFilter}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+        />
       )}
 
       {/* Empty state */}
