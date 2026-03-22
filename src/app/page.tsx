@@ -65,7 +65,7 @@ function PlaygroundMockup() {
         </div>
 
         {/* 3-panel layout */}
-        <div className="grid grid-cols-[160px_1fr_200px] h-[300px] sm:h-[340px] divide-x divide-border/20">
+        <div className="grid grid-cols-[120px_1fr] sm:grid-cols-[160px_1fr_200px] h-[240px] sm:h-[340px] divide-x divide-border/20">
           {/* Left: Tool sidebar */}
           <div className="p-3 space-y-1 overflow-hidden">
             <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/40 mb-2.5">
@@ -157,8 +157,8 @@ function PlaygroundMockup() {
             </div>
           </div>
 
-          {/* Right: Response */}
-          <div className="p-3 overflow-hidden">
+          {/* Right: Response — hidden on mobile */}
+          <div className="hidden sm:block p-3 overflow-hidden">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/40">
                 RESPONSE

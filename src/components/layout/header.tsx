@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Github } from "lucide-react";
+import { Sun, Moon, Github, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -45,9 +45,16 @@ function ThemeToggle() {
 
 export function Header() {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      {/* Main bar */}
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link
           href="/"
@@ -59,13 +66,14 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1">
+        {/* Desktop nav */}
+        <nav className="hidden sm:flex items-center gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors hidden sm:block",
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
                 pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href + "/"))
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -87,7 +95,51 @@ export function Header() {
             <ThemeToggle />
           </div>
         </nav>
+
+        {/* Mobile right side: github + theme + hamburger */}
+        <div className="flex sm:hidden items-center gap-1">
+          <Link
+            href="https://github.com/sameenchand/mcp-playground"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            aria-label="GitHub"
+          >
+            <Github className="h-4 w-4" />
+          </Link>
+          <ThemeToggle />
+          <button
+            onClick={() => setMobileOpen((prev) => !prev)}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {mobileOpen && (
+        <div className="sm:hidden border-t border-border/40 bg-background/95 backdrop-blur-sm">
+          <nav className="mx-auto max-w-7xl px-4 py-3 grid grid-cols-2 gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                  pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href + "/"))
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
