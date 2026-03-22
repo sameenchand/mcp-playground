@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, ArrowUpDown, ExternalLink, Lock, WifiOff, AlertTriangle } from "lucide-react";
+import { Search, ArrowUpDown, ExternalLink, Lock, WifiOff, AlertTriangle, Trophy, Copy, Check } from "lucide-react";
 import type { ScanResult } from "@/lib/quality-scanner";
 
 // ── Status helpers ─────────────────────────────────────────────────────────
@@ -82,12 +82,20 @@ export function QualityTable({ results, gradeFilter, statusFilter, onStatusFilte
   const [sortKey, setSortKey] = useState<SortKey>("score");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(0);
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
   const statusCounts = useMemo(() => ({
     reachable: results.filter((r) => getStatus(r) === "reachable").length,
     "auth-required": results.filter((r) => getStatus(r) === "auth-required").length,
     failed: results.filter((r) => getStatus(r) === "failed").length,
   }), [results]);
+
+  // Global top-10 by score (across all results, regardless of current filter/sort)
+  const top10Urls = useMemo(() => {
+    const reachable = results.filter((r) => !r.error);
+    const sorted = [...reachable].sort((a, b) => b.score - a.score);
+    return new Set(sorted.slice(0, 10).map((r) => r.url));
+  }, [results]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -240,20 +248,32 @@ export function QualityTable({ results, gradeFilter, statusFilter, onStatusFilte
                     {rank}
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-foreground truncate max-w-[300px]">
-                      {result.name}
-                    </p>
-                    {hasError && (
-                      <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                        {status === "auth-required" && <Lock className="h-3 w-3 text-yellow-500 shrink-0" />}
-                        {status === "failed" && <WifiOff className="h-3 w-3 text-muted-foreground/60 shrink-0" />}
-                        {status === "auth-required" && <span className="text-yellow-600 dark:text-yellow-400">Auth required</span>}
-                        {status === "failed" && (result.error === "Scan failed"
-                          ? <span className="flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-orange-500" />Scan failed</span>
-                          : <span>Unreachable</span>
+                    <div className="flex items-start gap-1.5">
+                      {top10Urls.has(result.url) && (
+                        <span title="Top 10 server">
+                          <Trophy className="h-3.5 w-3.5 text-yellow-500 shrink-0 mt-0.5" />
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-medium text-foreground truncate max-w-[260px]" title={result.name}>
+                          {result.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground/50 truncate max-w-[260px] mt-0.5" title={result.url}>
+                          {result.url}
+                        </p>
+                        {hasError && (
+                          <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                            {status === "auth-required" && <Lock className="h-3 w-3 text-yellow-500 shrink-0" />}
+                            {status === "failed" && <WifiOff className="h-3 w-3 text-muted-foreground/60 shrink-0" />}
+                            {status === "auth-required" && <span className="text-yellow-600 dark:text-yellow-400">Auth required</span>}
+                            {status === "failed" && (result.error === "Scan failed"
+                              ? <span className="flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-orange-500" />Scan failed</span>
+                              : <span>Unreachable</span>
+                            )}
+                          </p>
                         )}
-                      </p>
-                    )}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-center">
                     {hasError ? (
@@ -289,25 +309,41 @@ export function QualityTable({ results, gradeFilter, statusFilter, onStatusFilte
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {!hasError && (
-                      <div className="flex items-center justify-end gap-1">
-                        <Link
-                          href={`/lint?url=${encodeURIComponent(result.url)}`}
-                          className="inline-flex items-center px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                          title="View full lint report"
-                        >
-                          Lint
-                        </Link>
-                        <Link
-                          href={`/playground?url=${encodeURIComponent(result.url)}`}
-                          className="inline-flex items-center px-2 py-1 rounded text-xs text-primary hover:bg-primary/10 transition-colors"
-                          title="Test in playground"
-                        >
-                          <ExternalLink className="h-3 w-3 mr-1" />
-                          Test
-                        </Link>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(result.url);
+                          setCopiedUrl(result.url);
+                          setTimeout(() => setCopiedUrl((prev) => prev === result.url ? null : prev), 1500);
+                        }}
+                        className="inline-flex items-center px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        title="Copy URL"
+                      >
+                        {copiedUrl === result.url
+                          ? <Check className="h-3 w-3 text-green-500" />
+                          : <Copy className="h-3 w-3" />
+                        }
+                      </button>
+                      {!hasError && (
+                        <>
+                          <Link
+                            href={`/lint?url=${encodeURIComponent(result.url)}`}
+                            className="inline-flex items-center px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                            title="View full lint report"
+                          >
+                            Lint
+                          </Link>
+                          <Link
+                            href={`/playground?url=${encodeURIComponent(result.url)}`}
+                            className="inline-flex items-center px-2 py-1 rounded text-xs text-primary hover:bg-primary/10 transition-colors"
+                            title="Test in playground"
+                          >
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            Test
+                          </Link>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
