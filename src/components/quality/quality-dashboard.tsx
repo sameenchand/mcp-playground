@@ -17,6 +17,7 @@ interface ServerEntry {
 interface CachedData {
   results: ScanResult[];
   scannedUrls: string[];
+  scanIndex: number;
   timestamp: number;
 }
 
@@ -45,9 +46,9 @@ function loadCache(): CachedData | null {
   }
 }
 
-function saveCache(results: ScanResult[], scannedUrls: string[]) {
+function saveCache(results: ScanResult[], scannedUrls: string[], scanIndex: number) {
   try {
-    const data: CachedData = { results, scannedUrls, timestamp: Date.now() };
+    const data: CachedData = { results, scannedUrls, scanIndex, timestamp: Date.now() };
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
   } catch {
     // localStorage full or unavailable — ignore
@@ -112,7 +113,7 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
     if (cached && cached.results.length > 0) {
       setResults(cached.results);
       setScannedUrls(new Set(cached.scannedUrls));
-      scanIndexRef.current = cached.scannedUrls.length;
+      scanIndexRef.current = cached.scanIndex ?? 0;
     }
     setLoaded(true);
   }, []);
@@ -128,6 +129,12 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
     abortRef.current = false;
 
     let idx = scanIndexRef.current;
+    // If the scan ran to the end but missed servers (network failures),
+    // restart from 0 — the scanned-URL filter skips already-done servers instantly
+    if (idx >= servers.length) {
+      idx = 0;
+      scanIndexRef.current = 0;
+    }
     let currentResults = [...results];
     let currentScanned = new Set(scannedUrls);
 
@@ -186,7 +193,7 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
 
       // Partial save
       if (currentResults.length % SAVE_INTERVAL < BATCH_SIZE) {
-        saveCache(currentResults, Array.from(currentScanned));
+        saveCache(currentResults, Array.from(currentScanned), scanIndexRef.current);
       }
 
       // Delay between batches
@@ -196,7 +203,7 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
     }
 
     // Final save
-    saveCache(currentResults, Array.from(currentScanned));
+    saveCache(currentResults, Array.from(currentScanned), scanIndexRef.current);
     setScanning(false);
   }, [scanning, servers, results, scannedUrls]);
 
