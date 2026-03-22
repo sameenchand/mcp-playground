@@ -2,8 +2,18 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, ArrowUpDown, ExternalLink } from "lucide-react";
+import { Search, ArrowUpDown, ExternalLink, Lock, WifiOff, AlertTriangle } from "lucide-react";
 import type { ScanResult } from "@/lib/quality-scanner";
+
+// ── Status helpers ─────────────────────────────────────────────────────────
+
+type ServerStatus = "reachable" | "auth-required" | "failed";
+
+function getStatus(result: ScanResult): ServerStatus {
+  if (!result.error) return "reachable";
+  if (result.error.toLowerCase().includes("auth")) return "auth-required";
+  return "failed";
+}
 
 // ── Grade badge (inline) ───────────────────────────────────────────────────
 
@@ -58,16 +68,26 @@ function compareResults(a: ScanResult, b: ScanResult, key: SortKey, dir: SortDir
 
 const PAGE_SIZE = 25;
 
+type StatusFilter = "all" | "reachable" | "auth-required" | "failed";
+
 interface QualityTableProps {
   results: ScanResult[];
   gradeFilter: string | null;
+  statusFilter: StatusFilter;
+  onStatusFilterChange: (filter: StatusFilter) => void;
 }
 
-export function QualityTable({ results, gradeFilter }: QualityTableProps) {
+export function QualityTable({ results, gradeFilter, statusFilter, onStatusFilterChange }: QualityTableProps) {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("score");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(0);
+
+  const statusCounts = useMemo(() => ({
+    reachable: results.filter((r) => getStatus(r) === "reachable").length,
+    "auth-required": results.filter((r) => getStatus(r) === "auth-required").length,
+    failed: results.filter((r) => getStatus(r) === "failed").length,
+  }), [results]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -81,6 +101,11 @@ export function QualityTable({ results, gradeFilter }: QualityTableProps) {
 
   const filtered = useMemo(() => {
     let items = results;
+
+    // Status filter
+    if (statusFilter !== "all") {
+      items = items.filter((r) => getStatus(r) === statusFilter);
+    }
 
     // Grade filter
     if (gradeFilter) {
@@ -101,7 +126,7 @@ export function QualityTable({ results, gradeFilter }: QualityTableProps) {
     items = [...items].sort((a, b) => compareResults(a, b, sortKey, sortDir));
 
     return items;
-  }, [results, gradeFilter, search, sortKey, sortDir]);
+  }, [results, gradeFilter, statusFilter, search, sortKey, sortDir]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -120,6 +145,37 @@ export function QualityTable({ results, gradeFilter }: QualityTableProps) {
 
   return (
     <div className="rounded-xl border border-border/40 bg-card overflow-hidden">
+      {/* Status filter tabs */}
+      {results.length > 0 && (
+        <div className="px-4 pt-4 pb-0 flex flex-wrap gap-2">
+          {(
+            [
+              { key: "all" as StatusFilter, label: "All", count: results.length },
+              { key: "reachable" as StatusFilter, label: "Reachable", count: statusCounts.reachable },
+              { key: "auth-required" as StatusFilter, label: "Auth Required", count: statusCounts["auth-required"] },
+              { key: "failed" as StatusFilter, label: "Unreachable", count: statusCounts.failed },
+            ]
+          ).map(({ key, label, count }) => (
+            <button
+              key={key}
+              onClick={() => { onStatusFilterChange(key); setPage(0); }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                statusFilter === key
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+              }`}
+            >
+              {key === "auth-required" && <Lock className="h-3 w-3" />}
+              {key === "failed" && <WifiOff className="h-3 w-3" />}
+              {label}
+              <span className={`${statusFilter === key ? "bg-white/20" : "bg-muted"} rounded-full px-1.5 py-0.5 text-[10px] font-semibold`}>
+                {count}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Search bar */}
       <div className="p-4 border-b border-border/30">
         <div className="relative max-w-sm">
@@ -138,6 +194,7 @@ export function QualityTable({ results, gradeFilter }: QualityTableProps) {
         <p className="text-xs text-muted-foreground mt-2">
           {filtered.length} server{filtered.length !== 1 ? "s" : ""}
           {gradeFilter ? ` (Grade ${gradeFilter})` : ""}
+          {statusFilter !== "all" ? ` · ${statusFilter === "reachable" ? "Reachable" : statusFilter === "auth-required" ? "Auth Required" : "Unreachable"}` : ""}
         </p>
       </div>
 
@@ -172,6 +229,7 @@ export function QualityTable({ results, gradeFilter }: QualityTableProps) {
             {paged.map((result, i) => {
               const rank = page * PAGE_SIZE + i + 1;
               const hasError = !!result.error;
+              const status = getStatus(result);
 
               return (
                 <tr
@@ -186,8 +244,14 @@ export function QualityTable({ results, gradeFilter }: QualityTableProps) {
                       {result.name}
                     </p>
                     {hasError && (
-                      <p className="text-xs text-red-500 mt-0.5">
-                        {result.error}
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                        {status === "auth-required" && <Lock className="h-3 w-3 text-yellow-500 shrink-0" />}
+                        {status === "failed" && <WifiOff className="h-3 w-3 text-muted-foreground/60 shrink-0" />}
+                        {status === "auth-required" && <span className="text-yellow-600 dark:text-yellow-400">Auth required</span>}
+                        {status === "failed" && (result.error === "Scan failed"
+                          ? <span className="flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-orange-500" />Scan failed</span>
+                          : <span>Unreachable</span>
+                        )}
                       </p>
                     )}
                   </td>
