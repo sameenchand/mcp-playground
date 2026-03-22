@@ -18,6 +18,8 @@ import {
   Container,
   BarChart3,
 } from "lucide-react";
+export const dynamic = "force-dynamic";
+
 import { fetchServers } from "@/lib/registry-api";
 import { curatedServers } from "@/lib/featured-servers";
 import { checkFeaturedHealth } from "@/lib/featured-health";
