@@ -35,7 +35,7 @@ export default async function ExplorePage() {
           </div>
           <Link
             href="/docs/local-servers"
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border/50 bg-muted/30 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0 w-fit"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border/50 bg-muted/30 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0 w-full sm:w-fit justify-center sm:justify-start"
           >
             <Terminal className="h-3.5 w-3.5" />
             Local server? See how →
