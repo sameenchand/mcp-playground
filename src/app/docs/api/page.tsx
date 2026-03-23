@@ -127,6 +127,10 @@ export default function ApiDocsPage() {
             <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded">/lint</code>{" "}
             — 10 requests per minute per IP
           </p>
+          <p>
+            <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded">/scan-batch</code>{" "}
+            — 20 requests per minute per IP (used by the Quality Dashboard)
+          </p>
         </div>
         <p className="text-xs text-muted-foreground/60 mt-2">
           Exceeding limits returns <code className="text-xs bg-muted/50 px-1 rounded">429</code> with a{" "}
@@ -251,6 +255,79 @@ export default function ApiDocsPage() {
           authentication, use the Playground UI or{" "}
           <code className="bg-muted/50 px-1 rounded">POST /api/mcp/inspect</code>{" "}
           with headers in the request body.
+        </div>
+      </Endpoint>
+
+      {/* Lint endpoint */}
+      <Endpoint
+        method="GET"
+        path="/api/v1/lint"
+        description="Connect to an MCP server, run all 15+ quality lint rules, and return a letter grade (A–F), score, per-issue breakdown, and token cost estimate."
+      >
+        <h4 className="text-xs font-semibold text-foreground mb-2">
+          Query parameters
+        </h4>
+        <div className="divide-y divide-border/30 mb-4">
+          <Param name="url" type="string" required>
+            The MCP server URL to lint. Supports{" "}
+            <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">http(s)://</code> and{" "}
+            <code className="text-xs bg-muted/50 px-1 py-0.5 rounded">ws(s)://</code> schemes.
+          </Param>
+        </div>
+
+        <h4 className="text-xs font-semibold text-foreground mb-2">
+          Example request
+        </h4>
+        <CodeBlock
+          language="bash"
+          code={`curl "${BASE}/api/v1/lint?url=https://mcp.deepwiki.com/mcp"`}
+        />
+
+        <h4 className="text-xs font-semibold text-foreground mt-4 mb-2">
+          Example response
+        </h4>
+        <CodeBlock
+          code={JSON.stringify(
+            {
+              ok: true,
+              url: "https://mcp.deepwiki.com/mcp",
+              server: { name: "deepwiki", version: "1.0.0" },
+              transport: "streamable-http",
+              grade: "A",
+              score: 96,
+              summary: {
+                errors: 0,
+                warnings: 1,
+                infos: 2,
+                toolsChecked: 4,
+                resourcesChecked: 0,
+                promptsChecked: 0,
+              },
+              issues: [
+                {
+                  target: "ask_question",
+                  category: "tool",
+                  severity: "warning",
+                  rule: "tool-long-description",
+                  message: "Description is very long (>300 chars) — consider trimming",
+                },
+              ],
+              tokenEstimate: {
+                total: 820,
+                perTool: [{ name: "ask_question", tokens: 820 }],
+              },
+              _meta: { api: "v1", docs: `${BASE}/docs/api` },
+            },
+            null,
+            2,
+          )}
+        />
+
+        <div className="mt-4 rounded-lg bg-muted/10 border border-border/40 px-4 py-3 text-xs text-muted-foreground">
+          <strong className="text-foreground font-medium">Grades:</strong>{" "}
+          A (90–100) · B (75–89) · C (60–74) · D (40–59) · F (0–39).
+          Each error deducts 15 points, warning 5 points, info 1 point.
+          Servers with no tools automatically receive F.
         </div>
       </Endpoint>
 
