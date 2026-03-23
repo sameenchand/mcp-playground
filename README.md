@@ -34,9 +34,12 @@ MCP Playground solves a specific problem: there's no easy way to test MCP server
 - **Form validation** — Required fields validated with inline errors before submission
 - **Actionable errors** — Raw error codes mapped to plain-English troubleshooting messages
 - **Schema Linter** — Grade your MCP server's quality with a letter score (A–F). Checks tool descriptions, JSON Schema completeness, and estimates token cost. Available at `/lint` and via API
-- **Quality Dashboard** — Registry-wide quality leaderboard at `/quality`. Scans every live MCP server, grades them A–F, and displays a sortable, filterable table with grade distribution charts and CSV export. Results are cached locally for 24 hours
+- **Quality Dashboard** — Registry-wide quality leaderboard at `/quality`. Scans every live MCP server, grades them A–F, and displays a sortable, filterable table with grade distribution charts, status filters (reachable / auth required / unreachable), and CSV export. Results are cached locally for 24 hours
+- **Server detail page** — Every server has a detail page at `/server/[id]` with registry metadata, install commands, and a live quality scan that auto-runs on page load
+- **Explore with category filters** — Browse the registry at `/explore` with category pill filters on top of live-endpoint and no-auth filters
 - **Public API** — Free, CORS-enabled REST API (`/api/v1/`) for health checks, server inspection, registry search, and schema linting. Use it in CI pipelines or build your own integrations
-- **Full documentation** — Nine guide pages covering getting started, connecting, sandbox, embedding, local servers, schema linter, quality dashboard, API reference, and FAQ
+- **Grading methodology** — Every lint rule documented at `/docs/grading` with scoring formula, grade thresholds, and improvement tips. The grading logic is fully open source
+- **Full documentation** — Ten guide pages covering getting started, connecting, sandbox, embedding, local servers, schema linter, quality dashboard, grading methodology, API reference, and FAQ
 
 ## Quick Start
 
