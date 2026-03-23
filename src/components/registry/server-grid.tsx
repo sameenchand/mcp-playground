@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Wifi, Package, Lock, Tag } from "lucide-react";
+import { Wifi, Package, Lock, Tag, ChevronDown } from "lucide-react";
+
+const PAGE_SIZE = 50;
 import { ServerCard } from "./server-card";
 import { SearchBar } from "./search-bar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +19,7 @@ export function ServerGrid({ servers }: ServerGridProps) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Top categories with at least 2 servers, sorted by count descending
   const topCategories = useMemo(() => {
@@ -79,7 +82,7 @@ export function ServerGrid({ servers }: ServerGridProps) {
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <SearchBar
           value={query}
-          onChange={setQuery}
+          onChange={(v) => { setQuery(v); setVisibleCount(PAGE_SIZE); }}
           placeholder="Search MCP servers..."
           className="flex-1 max-w-lg"
         />
@@ -87,7 +90,7 @@ export function ServerGrid({ servers }: ServerGridProps) {
           {filterButtons.map((btn) => (
             <button
               key={btn.id}
-              onClick={() => setFilter(btn.id)}
+              onClick={() => { setFilter(btn.id); setVisibleCount(PAGE_SIZE); }}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
                 filter === btn.id
                   ? "bg-primary text-primary-foreground border-primary"
@@ -117,7 +120,7 @@ export function ServerGrid({ servers }: ServerGridProps) {
           {topCategories.map(({ cat, count }) => (
             <button
               key={cat}
-              onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat)}
+              onClick={() => { setCategoryFilter(categoryFilter === cat ? null : cat); setVisibleCount(PAGE_SIZE); }}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${
                 categoryFilter === cat
                   ? "bg-primary/10 text-primary border-primary/30"
@@ -163,11 +166,26 @@ export function ServerGrid({ servers }: ServerGridProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((server) => (
-            <ServerCard key={server.id} server={server} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.slice(0, visibleCount).map((server) => (
+              <ServerCard key={server.id} server={server} />
+            ))}
+          </div>
+          {visibleCount < filtered.length && (
+            <div className="flex flex-col items-center gap-2 pt-4">
+              <button
+                onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
+                className="px-5 py-2 rounded-lg border border-border/50 bg-card text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+              >
+                Load {Math.min(PAGE_SIZE, filtered.length - visibleCount)} more
+              </button>
+              <p className="text-xs text-muted-foreground/60">
+                Showing {Math.min(visibleCount, filtered.length)} of {filtered.length}
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

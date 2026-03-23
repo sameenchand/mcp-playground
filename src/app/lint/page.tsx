@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Metadata } from "next";
 import { LintClient } from "@/components/linter/lint-client";
 
@@ -17,7 +18,13 @@ export default function LintPage() {
         <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
           Paste your MCP server URL and get a quality report. We&apos;ll check
           tool descriptions, JSON Schema completeness, resource metadata, and
-          estimate the token cost of your tool definitions.
+          estimate the token cost of your tool definitions.{" "}
+          <Link
+            href="/docs/grading"
+            className="text-primary hover:underline underline-offset-4"
+          >
+            How are grades calculated? →
+          </Link>
         </p>
       </div>
       <LintClient />
