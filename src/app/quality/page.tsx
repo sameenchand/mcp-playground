@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { fetchServers } from "@/lib/registry-api";
 import { QualityDashboard } from "@/components/quality/quality-dashboard";
 import type { Metadata } from "next";
@@ -35,7 +36,13 @@ export default async function QualityPage() {
           A–F using{" "}
           <span className="text-foreground font-medium">15+ lint rules</span>{" "}
           covering tool descriptions, JSON Schema completeness, and metadata
-          quality.
+          quality.{" "}
+          <Link
+            href="/docs/grading"
+            className="text-primary hover:underline underline-offset-4 text-sm"
+          >
+            How grades are calculated →
+          </Link>
         </p>
       </div>
 
