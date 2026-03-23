@@ -139,7 +139,7 @@ export default function DocsIndexPage() {
           Something not covered here? Open an issue on GitHub or check the
           official MCP specification.
         </p>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3">
           <a
             href="https://github.com/sameenchand/mcp-playground/issues"
             target="_blank"

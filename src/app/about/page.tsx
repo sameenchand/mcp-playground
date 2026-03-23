@@ -209,7 +209,7 @@ Browser ← JSON Response ←  API Route ← MCP Server Response`}
             feedback, and bug reports are welcome. If you are building an MCP
             server, we would love to help you get listed and tested.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
             <a
               href="https://github.com/sameenchand/mcp-playground"
               target="_blank"
