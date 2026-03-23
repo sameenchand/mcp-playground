@@ -253,7 +253,9 @@ export function QualityDashboard({ servers }: { servers: ServerEntry[] }) {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             <Play className="h-4 w-4" />
-            {scannedCount > 0 ? "Resume Scan" : "Start Scan"}
+            {scannedCount > 0
+              ? `Resume Scan (${totalServers - scannedCount} left)`
+              : "Start Scan"}
           </button>
         )}
         {!scanning && isComplete && (
