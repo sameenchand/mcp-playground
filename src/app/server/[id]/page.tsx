@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { CopyButton } from "@/components/ui/copy-button";
 import { ServerHealth } from "@/components/registry/server-health";
 import { fetchServerById } from "@/lib/registry-api";
+import { ServerQualityPanel } from "@/components/server/server-quality-panel";
 
 interface ServerPageProps {
   params: Promise<{ id: string }>;
@@ -213,6 +214,9 @@ export default async function ServerPage({ params }: ServerPageProps) {
           )}
         </section>
       )}
+
+      {/* Quality Report — auto-scans the live endpoint */}
+      {hasRemote && <ServerQualityPanel url={server.remoteUrl!} />}
 
       {/* Local Package section */}
       {(npmPackage ?? pypiPackage ?? !hasRemote) && (
