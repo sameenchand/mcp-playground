@@ -26,6 +26,7 @@ const sections = [
     links: [
       { href: "/lint", label: "Schema Linter" },
       { href: "/quality", label: "Quality Dashboard" },
+      { href: "/docs/grading", label: "Grading Methodology" },
     ],
   },
   {
