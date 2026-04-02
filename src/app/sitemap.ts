@@ -1,105 +1,38 @@
 import type { MetadataRoute } from "next";
+import { fetchServers } from "@/lib/registry-api";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://mcpplayground.tech";
-  const now = new Date();
+export const revalidate = 3600; // regenerate every hour
 
-  return [
-    {
-      url: baseUrl,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/explore`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/connect`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/playground`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/lint`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/quality`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/docs`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/docs/getting-started`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/docs/connecting-servers`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/docs/sandbox`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/docs/embedding`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/docs/local-servers`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/docs/api`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/docs/grading`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/docs/faq`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-  ];
+const BASE = process.env.NEXT_PUBLIC_BASE_URL ?? "https://mcpplayground.tech";
+
+const STATIC_ROUTES: MetadataRoute.Sitemap = [
+  { url: BASE,                               priority: 1.0, changeFrequency: "daily"   },
+  { url: `${BASE}/explore`,                  priority: 0.9, changeFrequency: "hourly"  },
+  { url: `${BASE}/connect`,                  priority: 0.8, changeFrequency: "monthly" },
+  { url: `${BASE}/playground`,               priority: 0.8, changeFrequency: "monthly" },
+  { url: `${BASE}/lint`,                     priority: 0.7, changeFrequency: "monthly" },
+  { url: `${BASE}/quality`,                  priority: 0.7, changeFrequency: "daily"   },
+  { url: `${BASE}/about`,                    priority: 0.5, changeFrequency: "monthly" },
+  { url: `${BASE}/docs`,                     priority: 0.6, changeFrequency: "weekly"  },
+  { url: `${BASE}/docs/getting-started`,     priority: 0.6, changeFrequency: "weekly"  },
+  { url: `${BASE}/docs/grading`,             priority: 0.6, changeFrequency: "weekly"  },
+  { url: `${BASE}/docs/api`,                 priority: 0.6, changeFrequency: "weekly"  },
+  { url: `${BASE}/docs/connecting-servers`,  priority: 0.5, changeFrequency: "monthly" },
+  { url: `${BASE}/docs/local-servers`,       priority: 0.5, changeFrequency: "monthly" },
+  { url: `${BASE}/docs/faq`,                 priority: 0.5, changeFrequency: "monthly" },
+  { url: `${BASE}/docs/sandbox`,             priority: 0.5, changeFrequency: "monthly" },
+  { url: `${BASE}/docs/embedding`,           priority: 0.4, changeFrequency: "monthly" },
+];
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const servers = await fetchServers();
+
+  const serverRoutes: MetadataRoute.Sitemap = servers.map((server) => ({
+    url: `${BASE}/server/${encodeURIComponent(server.id)}`,
+    priority: 0.6,
+    changeFrequency: "weekly" as const,
+    lastModified: server.updated_at ? new Date(server.updated_at) : undefined,
+  }));
+
+  return [...STATIC_ROUTES, ...serverRoutes];
 }
