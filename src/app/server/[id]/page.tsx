@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -23,13 +24,40 @@ interface ServerPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: ServerPageProps) {
+export async function generateMetadata({ params }: ServerPageProps): Promise<Metadata> {
   const { id } = await params;
   const server = await fetchServerById(decodeURIComponent(id));
+
   if (!server) return { title: "Server Not Found" };
+
+  const encodedId = encodeURIComponent(server.id);
+  const url = `/server/${encodedId}`;
+  const description =
+    server.description ||
+    `Explore ${server.name} on MCP Playground — inspect tools, resources, and test live endpoints.`;
+
   return {
     title: server.name,
-    description: server.description,
+    description,
+    keywords: [
+      server.name,
+      "MCP server",
+      "Model Context Protocol",
+      ...(server.categories ?? []),
+      ...(server.tags ?? []),
+    ],
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${server.name} — MCP Playground`,
+      description,
+      url,
+      type: "article",
+    },
+    twitter: {
+      card: "summary",
+      title: `${server.name} — MCP Playground`,
+      description,
+    },
   };
 }
 
