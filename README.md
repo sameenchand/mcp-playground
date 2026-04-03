@@ -82,7 +82,7 @@ Remote connections happen server-side only — the browser never talks to MCP se
 
 - All remote MCP connections happen server-side (never in the browser)
 - URL validation blocks private IPs, localhost, and cloud metadata endpoints
-- Connection timeout: 10 seconds. Execution timeout: 30 seconds
+- Connection timeout: 10 seconds. Execution timeout: 30 seconds (function limit: 30s)
 - Rate limiting: 20 inspect / 10 execute calls per minute per IP
 - Response payloads capped at 1MB
 - Strict CSP headers on all routes
@@ -202,7 +202,12 @@ RATE_LIMIT_WINDOW=60000
 
 ## License
 
-MIT
+This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](./LICENSE).
+
+**What this means:**
+- You can freely use, fork, modify, and self-host this project
+- If you run a modified version as a public network service, you must open-source your changes under the same license
+- For commercial use or private deployment without open-sourcing, contact us for a commercial license: hello@mcpplayground.tech
 
 ---
 
