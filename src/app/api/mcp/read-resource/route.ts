@@ -3,6 +3,8 @@ import { z } from "zod";
 import { connectToServer } from "@/lib/mcp-client";
 import { checkRateLimit, validateMcpUrl, getClientIp } from "@/lib/api-security";
 
+export const maxDuration = 30;
+
 const rateLimitMap = new Map<string, number[]>();
 const EXECUTION_TIMEOUT_MS = 30_000;
 const MAX_RESPONSE_BYTES = 1_000_000;

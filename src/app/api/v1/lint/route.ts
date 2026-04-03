@@ -10,6 +10,8 @@
 import { NextRequest } from "next/server";
 import { inspectMcpServer } from "@/lib/mcp-client";
 import { lintMcpServer } from "@/lib/schema-linter";
+
+export const maxDuration = 30;
 import { apiResponse, apiError, corsOptions } from "@/lib/api-helpers";
 import { checkRateLimit, validateMcpUrl, getClientIp } from "@/lib/api-security";
 
