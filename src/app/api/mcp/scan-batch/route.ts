@@ -3,6 +3,8 @@ import { z } from "zod";
 import { scanServerBatch } from "@/lib/quality-scanner";
 import { checkRateLimit, validateMcpUrl, getClientIp } from "@/lib/api-security";
 
+export const maxDuration = 30;
+
 const rateLimitMap = new Map<string, number[]>();
 
 const RequestSchema = z.object({

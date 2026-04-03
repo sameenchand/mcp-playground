@@ -6,6 +6,8 @@ import {
 } from "@/lib/api-security";
 import { connectToServer } from "@/lib/mcp-client";
 
+export const maxDuration = 15;
+
 const rateLimitMap = new Map<string, number[]>();
 const isProd = process.env.NODE_ENV === "production";
 

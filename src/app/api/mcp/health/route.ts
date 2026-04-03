@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateMcpUrl } from "@/lib/api-security";
 import { connectToServer } from "@/lib/mcp-client";
 
+export const maxDuration = 15;
+
 export type HealthStatus = "up" | "auth_required" | "down" | "unknown";
 
 export interface HealthResult {
