@@ -66,7 +66,11 @@ export async function GET(req: Request) {
 
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        // MCP Streamable HTTP servers require both content types in Accept
+        "Accept": "application/json, text/event-stream",
+      },
       body: JSON.stringify({
         jsonrpc: "2.0",
         id: 1,
