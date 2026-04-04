@@ -241,7 +241,7 @@ This project is licensed under the [GNU Affero General Public License v3.0 (AGPL
 **What this means:**
 - You can freely use, fork, modify, and self-host this project
 - If you run a modified version as a public network service, you must open-source your changes under the same license
-- For commercial use or private deployment without open-sourcing, contact us for a commercial license: hello@mcpplayground.tech
+- For commercial use or private deployment without open-sourcing, contact us for a commercial license: 01sameen0101@gmail.com
 
 ---
 
