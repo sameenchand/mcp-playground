@@ -314,6 +314,20 @@ export function lintMcpServer(result: InspectResult): LintReport {
   const score = computeScore(issues, result);
   const grade = scoreToGrade(score);
 
+  // If grade is F but no errors exist, the F came purely from accumulated warnings.
+  // Surface it as an error so the issues list always explains an F grade,
+  // and so CI tools gating on errors correctly catch it.
+  const errorCount = issues.filter((i) => i.severity === "error").length;
+  if (grade === "F" && errorCount === 0) {
+    issues.push({
+      target: result.serverInfo.name,
+      category: "server",
+      severity: "error",
+      rule: "server-grade-f",
+      message: `Server received grade F (score ${score}/100) from accumulated warnings. Fix warnings above to improve quality.`,
+    });
+  }
+
   return {
     grade,
     score,
