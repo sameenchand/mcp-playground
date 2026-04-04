@@ -26,6 +26,13 @@ export default function LintPage() {
             className="text-primary hover:underline underline-offset-4"
           >
             How are grades calculated? →
+          </Link>{" "}
+          Want to run linting in CI?{" "}
+          <Link
+            href="/docs/ci"
+            className="text-primary hover:underline underline-offset-4"
+          >
+            See the CLI & CI docs →
           </Link>
         </p>
       </div>

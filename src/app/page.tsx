@@ -17,6 +17,7 @@ import {
   KeyRound,
   Container,
   BarChart3,
+  GitBranch,
 } from "lucide-react";
 export const dynamic = "force-dynamic";
 
@@ -269,9 +270,9 @@ export default async function HomePage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8">
             {[
               { value: `${serverCount}+`, label: "Servers in Registry" },
-              { value: "3", label: "Transport Protocols" },
+              { value: "19", label: "Lint Rules" },
               { value: "0", label: "Installation Required" },
-              { value: "MIT", label: "Open Source License" },
+              { value: "AGPL v3", label: "Open Source License" },
             ].map(({ value, label }) => (
               <div key={label} className="text-center">
                 <p className="text-2xl font-bold text-foreground">{value}</p>
@@ -404,6 +405,13 @@ export default async function HomePage() {
                 description:
                   `Browse ${serverCount}+ servers from the official MCP registry. Search, filter, and jump straight to the playground.`,
                 href: "/explore",
+              },
+              {
+                icon: <GitBranch className="h-5 w-5" />,
+                title: "CLI & CI Integration",
+                description:
+                  "mcpx lint in your terminal. Gate deployments on grade, token budget, or score regression. Works with GitHub Actions, GitLab CI, and any CI system.",
+                href: "/docs/ci",
               },
             ].map(({ icon, title, description, href }) => {
               const content = (
@@ -551,6 +559,74 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* CLI callout */}
+      <section className="py-16 px-4 border-t border-border/50 bg-muted/10">
+        <div className="mx-auto max-w-4xl">
+          <div className="rounded-2xl border border-border/50 bg-card/50 p-8 sm:p-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-medium mb-4">
+                  <Terminal className="h-3 w-3" />
+                  For Developers
+                </div>
+                <h2 className="text-2xl font-bold text-foreground mb-3">
+                  Lint MCP servers in CI
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">@samsec/mcpx</code> brings
+                  the MCP Playground linter to your terminal and CI pipelines.
+                  Enforce grade thresholds, catch token bloat, and fail deployments
+                  when schema quality drops — just like ESLint for your MCP server.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/docs/ci"
+                    className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline underline-offset-4 font-medium"
+                  >
+                    Read the docs
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                  <a
+                    href="https://www.npmjs.com/package/@samsec/mcpx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    npm: @samsec/mcpx
+                  </a>
+                </div>
+              </div>
+              <div className="rounded-lg bg-background border border-border/50 p-4 font-mono text-xs leading-relaxed overflow-x-auto">
+                <div className="text-muted-foreground/50 mb-2"># one-off, no install</div>
+                <div className="text-foreground mb-3">
+                  <span className="text-green-400/80">npx</span>{" "}
+                  <span className="text-blue-300/80">@samsec/mcpx</span>{" "}
+                  <span className="text-yellow-300/80">lint</span>{" "}
+                  <span className="text-muted-foreground">https://your-server.com/mcp</span>
+                </div>
+                <div className="text-muted-foreground/50 mb-2"># gate CI on grade</div>
+                <div className="text-foreground mb-3">
+                  <span className="text-green-400/80">mcpx</span>{" "}
+                  <span className="text-yellow-300/80">lint</span>{" "}
+                  <span className="text-muted-foreground">https://your-server.com/mcp</span>{" "}
+                  <span className="text-purple-300/80">--min-grade B</span>
+                </div>
+                <div className="text-muted-foreground/50 mb-2"># catch regressions on every PR</div>
+                <div className="text-foreground">
+                  <span className="text-green-400/80">mcpx</span>{" "}
+                  <span className="text-yellow-300/80">diff</span>{" "}
+                  <span className="text-purple-300/80">--base</span>{" "}
+                  <span className="text-muted-foreground">staging/mcp</span>{" "}
+                  <span className="text-purple-300/80">--head</span>{" "}
+                  <span className="text-muted-foreground">prod/mcp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA strip */}
       <section className="py-20 px-4">
         <div className="mx-auto max-w-2xl text-center">
@@ -567,6 +643,13 @@ export default async function HomePage() {
             >
               Connect a Server
               <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/docs/ci"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-card text-foreground font-semibold text-sm hover:bg-accent transition-colors"
+            >
+              <Terminal className="h-4 w-4" />
+              CLI & CI Docs
             </Link>
             <Link
               href="/quality"

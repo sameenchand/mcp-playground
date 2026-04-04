@@ -42,7 +42,22 @@ export default async function QualityPage() {
             className="text-primary hover:underline underline-offset-4 text-sm"
           >
             How grades are calculated →
-          </Link>
+          </Link>{" "}
+          Lint your own server at{" "}
+          <Link
+            href="/lint"
+            className="text-primary hover:underline underline-offset-4 text-sm"
+          >
+            /lint
+          </Link>{" "}
+          or run{" "}
+          <Link
+            href="/docs/ci"
+            className="text-primary hover:underline underline-offset-4 text-sm font-mono"
+          >
+            mcpx lint
+          </Link>{" "}
+          in CI.
         </p>
       </div>
 

@@ -75,6 +75,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/docs/ci"
+                  className="hover:text-foreground transition-colors"
+                >
+                  CLI &amp; CI
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/about"
                   className="hover:text-foreground transition-colors"
                 >
@@ -94,6 +102,24 @@ export function Footer() {
                   className="hover:text-foreground transition-colors"
                 >
                   GitHub →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="https://www.npmjs.com/package/@samsec/mcpx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  @samsec/mcpx on npm →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/ci"
+                  className="hover:text-foreground transition-colors"
+                >
+                  CLI &amp; CI Docs →
                 </Link>
               </li>
               <li>
