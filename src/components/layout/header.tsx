@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/playground", label: "Playground" },
   { href: "/lint", label: "Lint" },
   { href: "/quality", label: "Quality" },
+  { href: "/docs/ci", label: "mcpx", mono: true },
   { href: "/docs", label: "Docs" },
   { href: "/about", label: "About" },
 ];
@@ -73,7 +74,8 @@ export function Header() {
               key={link.href}
               href={link.href}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                "px-3 py-1.5 rounded-md text-sm transition-colors",
+                link.mono ? "font-mono font-semibold" : "font-medium",
                 pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href + "/"))
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -128,7 +130,8 @@ export function Header() {
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                  "px-3 py-2.5 rounded-md text-sm transition-colors",
+                  link.mono ? "font-mono font-semibold" : "font-medium",
                   pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href + "/"))
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/50"

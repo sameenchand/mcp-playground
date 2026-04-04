@@ -101,7 +101,17 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-foreground transition-colors"
                 >
-                  GitHub →
+                  GitHub (Playground) →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="https://github.com/sameenchand/mcpx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  GitHub (mcpx CLI) →
                 </Link>
               </li>
               <li>
