@@ -55,6 +55,15 @@ export default function CIDocsPage() {
         </p>
         <div className="flex flex-wrap items-center gap-4 mt-4">
           <a
+            href="https://github.com/sameenchand/mcpx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline underline-offset-4"
+          >
+            <ExternalLink className="h-3 w-3" />
+            GitHub: sameenchand/mcpx
+          </a>
+          <a
             href="https://www.npmjs.com/package/@samsec/mcpx"
             target="_blank"
             rel="noopener noreferrer"
@@ -321,6 +330,14 @@ jobs:
       <section className="rounded-xl border border-border/50 bg-muted/10 p-6">
         <h2 className="text-sm font-semibold text-foreground mb-3">Related</h2>
         <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+          <a
+            href="https://github.com/sameenchand/mcpx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline underline-offset-4"
+          >
+            mcpx on GitHub →
+          </a>
           <a
             href="https://www.npmjs.com/package/@samsec/mcpx"
             target="_blank"
