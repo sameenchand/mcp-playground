@@ -85,6 +85,10 @@ export default function AboutPage() {
                 desc: "See every JSON-RPC message between client and server. Debug protocol issues visually.",
               },
               {
+                title: "CLI & CI Integration",
+                desc: "mcpx lint in your terminal. Gate deployments on grade, token budget, or score regression. GitHub Actions, GitLab CI, and any CI system.",
+              },
+              {
                 title: "Share & Embed",
                 desc: "Shareable links with auto-run. Embeddable iframes for docs. README badges for instant demos.",
               },
@@ -205,9 +209,18 @@ Browser ← JSON Response ←  API Route ← MCP Server Response`}
             Open source
           </h2>
           <p className="mb-4">
-            MCP Playground is fully open source and MIT licensed. Contributions,
-            feedback, and bug reports are welcome. If you are building an MCP
-            server, we would love to help you get listed and tested.
+            MCP Playground is open source under the{" "}
+            <a
+              href="https://github.com/sameenchand/mcp-playground/blob/main/LICENSE"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline underline-offset-4"
+            >
+              AGPL v3 license
+            </a>
+            . Contributions, feedback, and bug reports are welcome. For
+            commercial use without open-sourcing your changes, contact us for a
+            commercial license.
           </p>
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
             <a
@@ -224,6 +237,12 @@ Browser ← JSON Response ←  API Route ← MCP Server Response`}
               className={buttonVariants({ variant: "outline" })}
             >
               Read the Docs
+            </Link>
+            <Link
+              href="/docs/ci"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              CLI &amp; CI Docs
             </Link>
             <a
               href="https://modelcontextprotocol.io/docs"
