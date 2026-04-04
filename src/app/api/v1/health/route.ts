@@ -86,18 +86,14 @@ export async function GET(req: Request) {
     let status: "up" | "auth_required" | "down";
     if (res.status === 401 || res.status === 403) {
       status = "auth_required";
-    } else if (res.ok || res.status < 500) {
+    } else if (res.ok || res.status === 202 || res.status === 405) {
+      // 405 Method Not Allowed is still "up" — server is reachable, just picky about method
       status = "up";
     } else {
       status = "down";
     }
 
-    return apiResponse({
-      status,
-      latencyMs,
-      statusCode: res.status,
-      url,
-    });
+    return apiResponse({ status, latencyMs, url });
   } catch (err) {
     const latencyMs = Date.now() - start;
     const message =
