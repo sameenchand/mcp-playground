@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
   Loader2,
@@ -28,8 +29,10 @@ const EXAMPLE_SERVERS = [
 ];
 
 export function LintClient() {
-  const [url, setUrl] = useState("");
+  const searchParams = useSearchParams();
+  const [url, setUrl] = useState(() => searchParams.get("url") ?? "");
   const [state, setState] = useState<LintState>({ status: "idle" });
+  const autoRanRef = useRef(false);
 
   const isLoading = state.status === "linting";
 
@@ -70,6 +73,16 @@ export function LintClient() {
       });
     }
   };
+
+  // Auto-trigger lint when ?url= is present in query params
+  useEffect(() => {
+    const paramUrl = searchParams.get("url");
+    if (paramUrl && !autoRanRef.current) {
+      autoRanRef.current = true;
+      void lint(paramUrl);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
