@@ -124,6 +124,40 @@ Share a reproducible execution link:
 https://mcpplayground.tech/playground?url=SERVER_URL&tool=TOOL_NAME&args=BASE64_JSON&autorun=1
 ```
 
+## CLI & CI Integration
+
+Use [`@samsec/mcpx`](https://www.npmjs.com/package/@samsec/mcpx) to lint MCP servers in your terminal or CI pipeline:
+
+```bash
+# One-off lint — no install needed
+npx @samsec/mcpx lint https://your-server.com/mcp
+
+# Global install
+npm install -g @samsec/mcpx
+mcpx lint https://your-server.com/mcp
+
+# Fail CI if grade drops below B
+mcpx lint https://your-server.com/mcp --min-grade B
+
+# Fail CI if token footprint exceeds budget
+mcpx lint https://your-server.com/mcp --token-budget 5000
+
+# Diff two server versions — fail on regressions
+mcpx diff --base https://staging.com/mcp --head https://prod.com/mcp
+```
+
+GitHub Action:
+
+```yaml
+- uses: samsec/mcpx@v1
+  with:
+    url: ${{ secrets.MCP_SERVER_URL }}
+    min-grade: B
+    token-budget: 5000
+```
+
+→ [npm package](https://www.npmjs.com/package/@samsec/mcpx) · [CI & GitHub Action docs](https://mcpplayground.tech/docs/ci)
+
 ## Public API
 
 MCP Playground exposes a free, CORS-enabled REST API at `https://mcpplayground.tech/api/v1/`:

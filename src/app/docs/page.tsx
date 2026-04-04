@@ -10,6 +10,7 @@ import {
   Braces,
   Sparkles,
   BarChart3,
+  GitBranch,
 } from "lucide-react";
 
 export const metadata = {
@@ -76,6 +77,14 @@ const guides = [
     title: "Quality Dashboard",
     description:
       "Registry-wide quality leaderboard. Scan every live MCP server, grade them A\u2013F, and export results as CSV.",
+    badge: "New",
+  },
+  {
+    href: "/docs/ci",
+    icon: <GitBranch className="h-5 w-5" />,
+    title: "CLI & CI Integration",
+    description:
+      "Lint MCP servers in your terminal and CI pipelines with mcpx. Enforce grade thresholds and token budgets on every deploy.",
     badge: "New",
   },
   {
