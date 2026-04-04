@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { LintClient } from "@/components/linter/lint-client";
+import { Loader2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Schema Linter — MCP Playground",
@@ -27,7 +29,14 @@ export default function LintPage() {
           </Link>
         </p>
       </div>
-      <LintClient />
+      <Suspense fallback={
+        <div className="flex items-center gap-2 text-muted-foreground text-sm p-4">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Loading...
+        </div>
+      }>
+        <LintClient />
+      </Suspense>
     </div>
   );
 }
