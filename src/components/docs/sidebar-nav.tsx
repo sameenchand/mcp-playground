@@ -25,6 +25,7 @@ const sections = [
       { href: "/lint", label: "Schema Linter" },
       { href: "/quality", label: "Quality Dashboard" },
       { href: "/docs/grading", label: "Grading Methodology" },
+      { href: "/docs/ci", label: "CLI & CI Integration" },
     ],
   },
   {

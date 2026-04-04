@@ -17,6 +17,7 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: `${BASE}/docs/getting-started`,     priority: 0.6, changeFrequency: "weekly"  },
   { url: `${BASE}/docs/grading`,             priority: 0.6, changeFrequency: "weekly"  },
   { url: `${BASE}/docs/api`,                 priority: 0.6, changeFrequency: "weekly"  },
+  { url: `${BASE}/docs/ci`,                  priority: 0.7, changeFrequency: "weekly"  },
   { url: `${BASE}/docs/connecting-servers`,  priority: 0.5, changeFrequency: "monthly" },
   { url: `${BASE}/docs/local-servers`,       priority: 0.5, changeFrequency: "monthly" },
   { url: `${BASE}/docs/faq`,                 priority: 0.5, changeFrequency: "monthly" },

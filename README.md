@@ -124,6 +124,40 @@ Share a reproducible execution link:
 https://mcpplayground.tech/playground?url=SERVER_URL&tool=TOOL_NAME&args=BASE64_JSON&autorun=1
 ```
 
+## CLI & CI Integration
+
+Use [`@samsec/mcpx`](https://www.npmjs.com/package/@samsec/mcpx) to lint MCP servers in your terminal or CI pipeline:
+
+```bash
+# One-off lint — no install needed
+npx @samsec/mcpx lint https://your-server.com/mcp
+
+# Global install
+npm install -g @samsec/mcpx
+mcpx lint https://your-server.com/mcp
+
+# Fail CI if grade drops below B
+mcpx lint https://your-server.com/mcp --min-grade B
+
+# Fail CI if token footprint exceeds budget
+mcpx lint https://your-server.com/mcp --token-budget 5000
+
+# Diff two server versions — fail on regressions
+mcpx diff --base https://staging.com/mcp --head https://prod.com/mcp
+```
+
+GitHub Action:
+
+```yaml
+- uses: samsec/mcpx@v1
+  with:
+    url: ${{ secrets.MCP_SERVER_URL }}
+    min-grade: B
+    token-budget: 5000
+```
+
+→ [npm package](https://www.npmjs.com/package/@samsec/mcpx) · [CI & GitHub Action docs](https://mcpplayground.tech/docs/ci)
+
 ## Public API
 
 MCP Playground exposes a free, CORS-enabled REST API at `https://mcpplayground.tech/api/v1/`:
@@ -207,7 +241,7 @@ This project is licensed under the [GNU Affero General Public License v3.0 (AGPL
 **What this means:**
 - You can freely use, fork, modify, and self-host this project
 - If you run a modified version as a public network service, you must open-source your changes under the same license
-- For commercial use or private deployment without open-sourcing, contact us for a commercial license: hello@mcpplayground.tech
+- For commercial use or private deployment without open-sourcing, contact us for a commercial license: 01sameen0101@gmail.com
 
 ---
 
